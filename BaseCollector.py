@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 import logging
-from modules.Connection import Connection
 
 LOG = logging.getLogger('apic_exporter.exporter')
 
@@ -20,14 +19,10 @@ class BaseCollector(ABC):
 
         # get actual APIC host list
         for host in self.hosts:
-            cookie = Connection.getCookie(host, self.user, self.password)
-            data   = Connection.getRequest(host,
-                                           "/api/node/class/topSystem.json?query-target-filter=eq(topSystem.role,\"controller\")",
-                                           cookie=cookie,
-                                           user=self.user,
-                                           password=self.password)
+            cookie = self.connection.getCookie(host, self.user, self.password)
+            data   = self.connection.getRequest(host, "/api/node/class/topSystem.json?query-target-filter=eq(topSystem.role,\"controller\")")
 
-            if Connection.isDataValid(data):
+            if self.connection.isDataValid(data):
                 for item in data['imdata']:
                     addr = item['topSystem']['attributes']['oobMgmtAddr']
                     actHosts[addr] = {}
@@ -37,13 +32,10 @@ class BaseCollector(ABC):
 
         # get APIC host mode
         for addr in actHosts.keys():
-            data   = Connection.getRequest(actHosts[addr]['mgmtAddress'],
-                                           "/api/node/class/infraSnNode.json",
-                                           cookie=actHosts[addr]['loginCookie'],
-                                           user=self.user,
-                                           password=self.password)
+            data   = self.connection.getRequest(actHosts[addr]['mgmtAddress'], "/api/node/class/infraSnNode.json")
 
-            if Connection.isDataValid(data):
+
+            if self.connection.isDataValid(data):
                 for item in data['imdata']:
                     _addr = (item['infraSnNode']['attributes']['oobIpAddr']).split("/")[0]
                     if _addr in actHosts.keys():
