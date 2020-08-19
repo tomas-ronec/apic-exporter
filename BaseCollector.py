@@ -7,17 +7,12 @@ LOG = logging.getLogger('apic_exporter.exporter')
 class BaseCollector(ABC):
 
     def __init__(self, config):
-        self.config      = config
-        self.user        = self.config['apic_user']
-        self.password    = self.config['apic_password']
-        self.tenant      = self.config['apic_tenant_name']
+        self.user        = config['apic_user']
+        self.password    = config['apic_password']
+        self.tenant      = config['apic_tenant_name']
 
-        self.hosts = {}
-        for host in self.config['apic_hosts'].split(','):
-            self.hosts[host] = {}
-            self.hosts[host]['name']   = host
-            self.hosts[host]['cookie'] = Connection.getCookie(host, self.user, self.password)
-
+        self.hosts = config['apic_hosts'].split(',')
+        self.connection = Connection(self.hosts, self.user, self.password)
 #        self.activeHosts = self._getActiveHosts()
 
     def _getActiveHosts(self):

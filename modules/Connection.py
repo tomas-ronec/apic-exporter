@@ -7,9 +7,16 @@ from urllib3 import exceptions
 
 LOG = logging.getLogger('apic_exporter.exporter')
 
-class Connection:
+class Connection():
 
-    def getCookie(target, user, password):
+    def __init__(self, hosts, user, password):
+        self.user = user
+        self.password = password
+        self.cookies = {}
+        for host in hosts:
+            self.cookies[host] = self.getCookie(host, self.user, self.password)
+
+    def getCookie(self, target, user, password):
         disable_warnings(exceptions.InsecureRequestWarning)
         proxies = {'https': '', 'http': '', 'no': '*'}
 
@@ -32,29 +39,25 @@ class Connection:
 
         return cookie
 
-    def getRequest(target, request, **kwargs):
+    def getRequest(self, target, request):
         disable_warnings(exceptions.InsecureRequestWarning)
-
-        cookie   = kwargs.pop('cookie')
-        user     = kwargs.pop('user')
-        password = kwargs.pop('password')
         proxies  = {'https': '', 'http': '', 'no': '*'}
 
         url     = "https://" + target + request
         LOG.debug('Submitting request %s', url)
 
         try:
-            resp = requests.get(url, cookies={"APIC-cookie": cookie}, proxies=proxies, verify=False, timeout=15)
+            resp = requests.get(url, cookies={"APIC-cookie": self.cookies[target] }, proxies=proxies, verify=False, timeout=15)
         except ConnectionError as e:
             logging.error("Cannot connect to %s: %s", url, e)
             return None
 
         # refresh the cookie
         if resp.status_code == 403 and ("Token was invalid" in resp.text or "token" in resp.text):
-            cookie = Connection.getCookie(target, user, password)
+            self.cookies[target] = Connection.getCookie(target, self.user, self.password)
 
             try:
-                resp = requests.get(url, cookies={"APIC-cookie": cookie}, proxies=proxies, verify=False, timeout=15)
+                resp = requests.get(url, cookies={"APIC-cookie": self.cookies[target]}, proxies=proxies, verify=False, timeout=15)
             except ConnectionError as e:
                 logging.error("Cannot connect to %s: %s", url, e)
                 return None
@@ -67,7 +70,7 @@ class Connection:
             logging.error("url %s responding with %s", url, resp.status_code)
             return None
 
-    def isDataValid(data):
+    def isDataValid(self, data):
         if data is None:
             return False
         if isinstance(data, dict) and isinstance(data.get('imdata'), list):

@@ -2,7 +2,6 @@ import logging
 
 from prometheus_client.core import GaugeMetricFamily
 import BaseCollector
-from modules.Connection import Connection
 
 LOG = logging.getLogger('apic_exporter.exporter')
 
@@ -17,9 +16,9 @@ class ApicInterfacesCollector (BaseCollector.BaseCollector):
 
         # query only reset counters > 0
         query = '/api/node/class/ethpmPhysIf.json?query-target-filter=gt(ethpmPhysIf.resetCtr,"0")'
-        for host in self.hosts.keys():
-            fetched_data   = Connection.getRequest(host, query, cookie=self.hosts[host]['cookie'], user=self.user, password=self.password)
-            if not Connection.isDataValid(fetched_data):
+        for host in self.hosts:
+            fetched_data   = self.connection.getRequest(host, query)
+            if not self.connection.isDataValid(fetched_data):
                 LOG.error("Skipping apic host %s, %s did not return anything", host, query)
                 continue
 
