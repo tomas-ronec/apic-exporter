@@ -35,7 +35,7 @@ class ApicHealthCollector (BaseCollector.BaseCollector):
             yield g
 
             # memory allocation
-            g = GaugeMetricFamily('network_apic_max_memory_allocation_bytes',
+            g = GaugeMetricFamily('network_apic_max_memory_allocation_kb',
                                   'APIC maximum memory allocated',
                                   labels=['hostname'])
 
@@ -43,7 +43,7 @@ class ApicHealthCollector (BaseCollector.BaseCollector):
             yield g
 
             # free memory
-            g = GaugeMetricFamily('network_apic_free_memory_bytes',
+            g = GaugeMetricFamily('network_apic_free_memory_kb',
                                   'APIC maximum amount of available memory',
                                   labels=['hostname'])
 
