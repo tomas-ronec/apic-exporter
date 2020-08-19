@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from modules.Connection import Connection
 import logging
 
 LOG = logging.getLogger('apic_exporter.exporter')
