@@ -21,6 +21,7 @@ class ApicInterfacesCollector (BaseCollector.BaseCollector):
             fetched_data   = Connection.getRequest(host, query, cookie=self.hosts[host]['cookie'], user=self.user, password=self.password)
             if not Connection.isDataValid(fetched_data):
                 LOG.error("Skipping apic host %s, %s did not return anything", host, query)
+                continue
 
             g = GaugeMetricFamily('network_apic_physcial_interface_reset_counter',
                                   'APIC physical interface reset counter',
