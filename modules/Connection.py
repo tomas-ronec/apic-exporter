@@ -54,7 +54,7 @@ class Connection:
             cookie = Connection.getCookie(target, user, password)
 
             try:
-                resp = requests.post(url, cookies={"APIC-cookie": cookie}, proxies=proxies, verify=False, timeout=15)
+                resp = requests.get(url, cookies={"APIC-cookie": cookie}, proxies=proxies, verify=False, timeout=15)
             except ConnectionError as e:
                 logging.error("Cannot connect to %s: %s", url, e)
                 return None
