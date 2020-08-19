@@ -54,7 +54,7 @@ class Connection():
 
         # refresh the cookie
         if resp.status_code == 403 and ("Token was invalid" in resp.text or "token" in resp.text):
-            self.cookies[target] = Connection.getCookie(target, self.user, self.password)
+            self.cookies[target] = self.getCookie(target, self.user, self.password)
 
             try:
                 resp = requests.get(url, cookies={"APIC-cookie": self.cookies[target]}, proxies=proxies, verify=False, timeout=15)
