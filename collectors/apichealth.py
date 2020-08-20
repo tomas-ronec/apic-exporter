@@ -4,10 +4,7 @@ from prometheus_client.core import GaugeMetricFamily, Summary
 import BaseCollector
 
 LOG          = logging.getLogger('apic_exporter.exporter')
-# Create a metric to track time spent and requests made.
-# https://github.com/prometheus/client_python/issues/82
-#REQUEST_TIME = Summary('request_processing_seconds', 'Time spent processing request', ('collector'))
-#COLLECT_TIME = REQUEST_TIME.labels('apichealth')
+REQUEST_TIME = Summary('apic_health_processing_seconds', 'Time spent processing request')
 
 class ApicHealthCollector (BaseCollector.BaseCollector):
 
@@ -20,7 +17,7 @@ class ApicHealthCollector (BaseCollector.BaseCollector):
 
         yield GaugeMetricFamily('network_apic_free_memory_bytes', 'APIC maximum amount of available memory')
 
-#    @COLLECT_TIME.time()
+    @REQUEST_TIME.time()
     def collect(self):
         LOG.info('Collecting APIC health metrics ...')
 

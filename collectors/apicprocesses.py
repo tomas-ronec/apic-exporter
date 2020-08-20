@@ -1,9 +1,10 @@
 import re, logging
 
-from prometheus_client.core import GaugeMetricFamily
+from prometheus_client.core import GaugeMetricFamily, Summary
 import BaseCollector
 
 LOG = logging.getLogger('apic_exporter.exporter')
+REQUEST_TIME = Summary('apic_processes_processing_seconds', 'Time spent processing request')
 
 class ApicProcessesCollector (BaseCollector.BaseCollector):
 
@@ -14,6 +15,7 @@ class ApicProcessesCollector (BaseCollector.BaseCollector):
 
         yield GaugeMetricFamily('network_apic_process_memory_used_avg_kb', 'Average memory used by process')
 
+    @REQUEST_TIME.time()
     def collect(self):
         LOG.info('Collecting APIC health metrics ...')
 

@@ -1,9 +1,10 @@
 import logging
 
-from prometheus_client.core import GaugeMetricFamily
+from prometheus_client.core import GaugeMetricFamily, Summary
 import BaseCollector
 
 LOG = logging.getLogger('apic_exporter.exporter')
+REQUEST_TIME = Summary('apic_interfaces_processing_seconds', 'Time spent processing request')
 
 class ApicInterfacesCollector (BaseCollector.BaseCollector):
 
@@ -11,6 +12,7 @@ class ApicInterfacesCollector (BaseCollector.BaseCollector):
 
         yield GaugeMetricFamily('network_apic_physcial_interface_reset_counter', 'APIC physical interface reset counter')
 
+    @REQUEST_TIME.time()
     def collect(self):
         LOG.info('Collecting APIC interface metrics ...')
 
