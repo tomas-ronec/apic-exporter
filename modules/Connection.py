@@ -28,6 +28,9 @@ class Connection():
         except ConnectionError as e:
             logging.error("Cannot connect to %s: %s", url, e)
             return None
+        except TimeoutError as e:
+            logging.error("Connection with host %s timed out", target)
+            return None
 
         cookie = None
         if resp.status_code == 200:
@@ -51,6 +54,9 @@ class Connection():
         except ConnectionError as e:
             logging.error("Cannot connect to %s: %s", url, e)
             return None
+        except TimeoutError as e:
+            logging.error("Connection with host %s timed out", target)
+            return None
 
         # refresh the cookie
         if resp.status_code == 403 and ("Token was invalid" in resp.text or "token" in resp.text):
@@ -61,6 +67,9 @@ class Connection():
             except ConnectionError as e:
                 logging.error("Cannot connect to %s: %s", url, e)
                 return None
+            except TimeoutError as e:
+                logging.error("Connection with host %s timed out", target)
+            return None
 
         if resp.status_code == 200:
             res = json.loads(resp.text)
