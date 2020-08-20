@@ -8,13 +8,14 @@ import click
 from prometheus_client.core import REGISTRY
 from prometheus_client import start_http_server
 
-from collectors import apichealth, apicinterfaces
+from collectors import apichealth, apicinterfaces, apicprocesses
 
 
 def run_prometheus_server(port, apic_config):
     start_http_server(int(port))
     REGISTRY.register(apichealth.ApicHealthCollector(apic_config))
     REGISTRY.register(apicinterfaces.ApicInterfacesCollector(apic_config))
+    REGISTRY.register(apicprocesses.ApicProcessesCollector(apic_config))
     while True:
         time.sleep(1)
 

@@ -14,6 +14,10 @@ class ApicInterfacesCollector (BaseCollector.BaseCollector):
     def collect(self):
         LOG.info('Collecting APIC interface metrics ...')
 
+        g = GaugeMetricFamily('network_apic_physcial_interface_reset_counter',
+                              'APIC physical interface reset counter',
+                              labels=['apicHost','interfaceID'])
+
         # query only reset counters > 0
         query = '/api/node/class/ethpmPhysIf.json?query-target-filter=gt(ethpmPhysIf.resetCtr,"0")'
         for host in self.hosts:
@@ -22,14 +26,10 @@ class ApicInterfacesCollector (BaseCollector.BaseCollector):
                 LOG.error("Skipping apic host %s, %s did not return anything", host, query)
                 continue
 
-            g = GaugeMetricFamily('network_apic_physcial_interface_reset_counter',
-                                  'APIC physical interface reset counter',
-                                  labels=['interfaceID'])
-
             # physical interface reset counter
             for item in fetched_data['imdata']:
 
-                g.add_metric(labels=[host + "-" + item['ethpmPhysIf']['attributes']['dn']],
+                g.add_metric(labels=[host, item['ethpmPhysIf']['attributes']['dn']],
                              value=item['ethpmPhysIf']['attributes']['resetCtr'])
 
-            yield g
+        yield g
