@@ -17,7 +17,7 @@ class ApicProcessesCollector (BaseCollector.BaseCollector):
 
     @REQUEST_TIME.time()
     def collect(self):
-        LOG.info('Collecting APIC health metrics ...')
+        LOG.info('Collecting APIC processes metrics ...')
 
         g_mem_min = GaugeMetricFamily('network_apic_process_memory_used_min_kb',
                                       'Minimum memory used by process',
