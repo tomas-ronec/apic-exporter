@@ -60,6 +60,7 @@ def main(port, config):
         port,
         config
     ))
+    LOG.info("APIC Exporter connects to APIC hosts: %s", apic_config['apic_hosts'])
 
     run_prometheus_server(port, apic_config)
 

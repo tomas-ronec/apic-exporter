@@ -12,7 +12,6 @@ class BaseCollector(ABC):
         self.tenant      = config['apic_tenant_name']
 
         self.hosts = config['apic_hosts'].split(',')
-        LOG.info("APIC hosts to fetch MIT data from: %s", config['apic_hosts'])
         self.connection = Connection(self.hosts, self.user, self.password)
 #        self.activeHosts = self._getActiveHosts()
 
