@@ -19,6 +19,7 @@ class ApicIPsCollector (BaseCollector.BaseCollector):
                                    'Counter for duplicate IPs',
                                     labels=['apicHost', 'ip', 'mac', 'nodeId', 'tenant'])
 
+        metric_counter = 0
         query = '/api/node/class/fvIp.json?rsp-subtree=full&rsp-subtree-class=fvReportingNode&query-target-filter=and(ne(fvIp.debugMACMessage,""))'
         for host in self.hosts:
             fetched_data   = self.connection.getRequest(host, query)
@@ -43,7 +44,10 @@ class ApicIPsCollector (BaseCollector.BaseCollector):
                     _nodeIds = '+'.join(child_nodes)
 
                 LOG.debug("host: %s, ip: %s, mac: %s, nodes: %s", host, addr, mac, _nodeIds)
+                metric_counter += 1
 
                 g_dip.add_metric(labels=[host, addr, mac, _nodeIds, tenant], value=1)
 
         yield g_dip
+
+        LOG.info('Collected %s APIC IP metrics', metric_counter)

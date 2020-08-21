@@ -31,6 +31,7 @@ class ApicProcessesCollector (BaseCollector.BaseCollector):
                                       'Average memory used by process',
                                       labels=['apicHost', 'procName', 'nodeId', 'nodeRole'])
 
+        metric_counter = 0
         query = '/api/node/class/fabricNode.json?'
         for host in self.hosts:
             fetched_data   = self.connection.getRequest(host, query)
@@ -78,9 +79,13 @@ class ApicProcessesCollector (BaseCollector.BaseCollector):
                         # Avg memory used
                         g_mem_avg.add_metric(labels=[host, proc_name, node_id, node_role], value=mem_data['imdata'][0]['procProcMemHist5min']['attributes']['usedAvg'])
 
+                        metric_counter +=3
+
         yield g_mem_min
         yield g_mem_max
         yield g_mem_avg
+
+        LOG.info('Collected %s APIC processes metrics', metric_counter)
 
     def _parseNodeIdInProcDN(self, procDn):
         nodeId = ''

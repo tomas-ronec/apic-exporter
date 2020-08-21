@@ -23,6 +23,7 @@ class ApicHealthCollector (BaseCollector.BaseCollector):
 
         g_access = GaugeMetricFamily('network_apic_accessible', 'APIC controller accessibility', labels=['apicHost'])
 
+        metric_counter = 0
         for host in self.hosts:
             query = '/api/node/class/topSystem.json?query-target-filter=eq(topSystem.oobMgmtAddr,\"' + host + '\")'
             fetched_data   = self.connection.getRequest(host, query)
@@ -32,7 +33,10 @@ class ApicHealthCollector (BaseCollector.BaseCollector):
                 continue
             else:
                 g_access.add_metric(labels=[host], value=1)
+
+            metric_counter += 1
         yield  g_access
+
 
         g_cpu  = GaugeMetricFamily('network_apic_cpu_usage_percent', 'APIC CPU utilization', labels=['apicHost'])
         g_aloc = GaugeMetricFamily('network_apic_max_memory_allocation_kb', 'APIC maximum memory allocated', labels=['apicHost'])
@@ -48,7 +52,10 @@ class ApicHealthCollector (BaseCollector.BaseCollector):
             g_cpu.add_metric(labels=[host], value=fetched_data['imdata'][0]['procEntity']['attributes']['cpuPct'])
             g_aloc.add_metric(labels=[host], value=fetched_data['imdata'][0]['procEntity']['attributes']['maxMemAlloc'])
             g_free.add_metric(labels=[host], value=fetched_data['imdata'][0]['procEntity']['attributes']['memFree'])
+            metric_counter += 3
 
         yield g_cpu
         yield g_aloc
         yield g_free
+
+        LOG.info('Collected %s APIC health metrics', metric_counter)

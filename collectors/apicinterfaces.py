@@ -20,6 +20,7 @@ class ApicInterfacesCollector (BaseCollector.BaseCollector):
                               'APIC physical interface reset counter',
                               labels=['apicHost','interfaceID'])
 
+        metric_counter = 0
         # query only reset counters > 0
         query = '/api/node/class/ethpmPhysIf.json?query-target-filter=gt(ethpmPhysIf.resetCtr,"0")'
         for host in self.hosts:
@@ -33,5 +34,8 @@ class ApicInterfacesCollector (BaseCollector.BaseCollector):
 
                 g.add_metric(labels=[host, item['ethpmPhysIf']['attributes']['dn']],
                              value=item['ethpmPhysIf']['attributes']['resetCtr'])
+                metric_counter += 1
 
         yield g
+
+        LOG.info('Collected %s APIC interface metrics', metric_counter)
