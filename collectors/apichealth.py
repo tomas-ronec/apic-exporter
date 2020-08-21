@@ -9,7 +9,7 @@ REQUEST_TIME = Summary('apic_health_processing_seconds', 'Time spent processing 
 class ApicHealthCollector (BaseCollector.BaseCollector):
 
     def describe(self):
-        yield GaugeMetricFamily('network_apic_accessible', 'APIC accessibility')
+        yield GaugeMetricFamily('network_apic_accessible', 'APIC controller accessibility')
 
         yield GaugeMetricFamily('network_apic_cpu_usage_percent', 'APIC CPU utilization')
 
@@ -20,6 +20,19 @@ class ApicHealthCollector (BaseCollector.BaseCollector):
     @REQUEST_TIME.time()
     def collect(self):
         LOG.info('Collecting APIC health metrics ...')
+
+        g_access = GaugeMetricFamily('network_apic_accessible', 'APIC controller accessibility', labels=['apicHost'])
+
+        for host in self.hosts:
+            query = '/api/node/class/topSystem.json?query-target-filter=eq(topSystem.oobMgmtAddr,\"' + host + '\")'
+            fetched_data   = self.connection.getRequest(host, query)
+            if not self.connection.isDataValid(fetched_data):
+                LOG.error("Skipping apic host %s, %s did not return anything", host, query)
+                g_access.add_metric(labels=[host], value=0)
+                continue
+            else:
+                g_access.add_metric(labels=[host], value=1)
+        yield  g_access
 
         g_cpu  = GaugeMetricFamily('network_apic_cpu_usage_percent', 'APIC CPU utilization', labels=['apicHost'])
         g_aloc = GaugeMetricFamily('network_apic_max_memory_allocation_kb', 'APIC maximum memory allocated', labels=['apicHost'])

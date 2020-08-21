@@ -18,31 +18,24 @@ class BaseCollector(ABC):
     def _getActiveHosts(self):
         actHosts = {}
 
+        query = '/api/node/class/topSystem.json?query-target-filter=eq(topSystem.role,"controller")'
         # get actual APIC host list
         for host in self.hosts:
             cookie = self.connection.getCookie(host, self.user, self.password)
-            data   = self.connection.getRequest(host, "/api/node/class/topSystem.json?query-target-filter=eq(topSystem.role,\"controller\")")
-
+            data   = self.connection.getRequest(host, query)
             if self.connection.isDataValid(data):
                 for item in data['imdata']:
                     addr = item['topSystem']['attributes']['oobMgmtAddr']
                     actHosts[addr] = {}
-                    actHosts[addr]['mgmtAddress'] = addr
+                    actHosts[addr]['mgmtAddress'] = item['topSystem']['attributes']['oobMgmtAddr']
+                    actHosts[addr]['address']     = item['topSystem']['attributes']['address']
+                    actHosts[addr]['dn']          = item['topSystem']['attributes']['dn']
+                    actHosts[addr]['role']        = item['topSystem']['attributes']['role']
+                    actHosts[addr]['state']       = item['topSystem']['attributes']['state']
                     actHosts[addr]['loginCookie'] = cookie
-                break
+            break #
 
-        # get APIC host mode
-        for addr in actHosts.keys():
-            data   = self.connection.getRequest(actHosts[addr]['mgmtAddress'], "/api/node/class/infraSnNode.json")
-
-
-            if self.connection.isDataValid(data):
-                for item in data['imdata']:
-                    _addr = (item['infraSnNode']['attributes']['oobIpAddr']).split("/")[0]
-                    if _addr in actHosts.keys():
-                        actHosts[_addr]['apicMode'] = item['infraSnNode']['attributes']['apicMode']
-
-        return {a: b for a, b in actHosts.items() if b['apicMode'] == 'active'}
+        return {a: b for a, b in actHosts.items() if b['state'] == 'in-service'}
 
     @abstractmethod
     def describe(self):
