@@ -6,6 +6,7 @@ from urllib3 import disable_warnings
 from urllib3 import exceptions
 
 LOG = logging.getLogger('apic_exporter.exporter')
+TIMEOUT = 15
 
 class Connection():
 
@@ -24,12 +25,12 @@ class Connection():
         payload = {"aaaUser":{"attributes": {"name": user, "pwd": password}}}
 
         try:
-            resp = requests.post(url, json=payload, proxies=proxies, verify=False, timeout=15)
+            resp = requests.post(url, json=payload, proxies=proxies, verify=False, timeout=TIMEOUT)
         except ConnectionError as e:
-            logging.error("Cannot connect to %s: %s", url, e)
+            LOG.error("Cannot connect to %s: %s", url, e)
             return None
         except TimeoutError as e:
-            logging.error("Connection with host %s timed out", target)
+            LOG.error("Connection with host %s timed out", target)
             return None
 
         cookie = None
@@ -38,7 +39,7 @@ class Connection():
             resp.close()
             cookie = res['imdata'][0]['aaaLogin']['attributes']['token']
         else:
-            logging.error("url %s responds with %s", url, resp.status_code)
+            LOG.error("url %s responds with %s", url, resp.status_code)
 
         return cookie
 
@@ -50,12 +51,12 @@ class Connection():
         LOG.debug('Submitting request %s', url)
 
         try:
-            resp = requests.get(url, cookies={"APIC-cookie": self.cookies[target] }, proxies=proxies, verify=False, timeout=15)
+            resp = requests.get(url, cookies={"APIC-cookie": self.cookies[target] }, proxies=proxies, verify=False, timeout=TIMEOUT)
         except ConnectionError as e:
-            logging.error("Cannot connect to %s: %s", url, e)
+            LOG.error("Cannot connect to %s: %s", url, e)
             return None
         except TimeoutError as e:
-            logging.error("Connection with host %s timed out", target)
+            LOG.error("Connection with host %s timed out", target)
             return None
 
         # refresh the cookie
@@ -63,12 +64,12 @@ class Connection():
             self.cookies[target] = self.getCookie(target, self.user, self.password)
 
             try:
-                resp = requests.get(url, cookies={"APIC-cookie": self.cookies[target]}, proxies=proxies, verify=False, timeout=15)
+                resp = requests.get(url, cookies={"APIC-cookie": self.cookies[target]}, proxies=proxies, verify=False, timeout=TIMEOUT)
             except ConnectionError as e:
-                logging.error("Cannot connect to %s: %s", url, e)
+                LOG.error("Cannot connect to %s: %s", url, e)
                 return None
             except TimeoutError as e:
-                logging.error("Connection with host %s timed out", target)
+                LOG.error("Connection with host %s timed out", target)
             return None
 
         if resp.status_code == 200:
@@ -76,7 +77,7 @@ class Connection():
             resp.close()
             return res
         else:
-            logging.error("url %s responding with %s", url, resp.status_code)
+            LOG.error("url %s responding with %s", url, resp.status_code)
             return None
 
     def isDataValid(self, data):
