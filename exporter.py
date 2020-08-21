@@ -10,6 +10,8 @@ from prometheus_client import start_http_server
 
 from collectors import apichealth, apicinterfaces, apicprocesses,apicips
 
+LOG = logging.getLogger('apic_exporter.exporter')
+
 def run_prometheus_server(port, apic_config):
     start_http_server(int(port))
     REGISTRY.register(apichealth.ApicHealthCollector(apic_config))
@@ -26,10 +28,10 @@ def get_config(config_file):
             with open(config_file) as f:
                 config = yaml.load(f, Loader=yaml.Loader)
         except IOError as e:
-            logging.error("Couldn't open configuration file: " + str(e))
+            LOG.error("Couldn't open configuration file: " + str(e))
         return config
     else:
-        logging.error("Config file doesn't exist: " + config_file)
+        LOG.error("Config file doesn't exist: " + config_file)
         exit(0)
 
 @click.command()
@@ -46,17 +48,15 @@ def main(port, config):
     exporter_config = config_obj['exporter']
     apic_config     = config_obj['aci']
 
-    log = logging.getLogger(__name__)
+    level = logging.getLevelName("INFO")
     if exporter_config['log_level']:
-        log.setLevel(logging.getLevelName(
-            exporter_config['log_level'].upper()))
-    else:
-        log.setLevel(logging.getLevelName("INFO"))
+        level = logging.getLevelName(
+            exporter_config['log_level'].upper())
 
     format = '[%(asctime)s] [%(levelname)s] %(message)s'
-    logging.basicConfig(stream=sys.stdout, format=format)
+    logging.basicConfig(stream=sys.stdout, format=format, level=level)
 
-    log.info("Starting Apic Exporter on port={} config={}".format(
+    LOG.info("Starting Apic Exporter on port={} config={}".format(
         port,
         config
     ))

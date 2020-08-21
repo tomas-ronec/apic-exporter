@@ -23,7 +23,7 @@ class ApicIPsCollector (BaseCollector.BaseCollector):
         for host in self.hosts:
             fetched_data   = self.connection.getRequest(host, query)
             if not self.connection.isDataValid(fetched_data):
-                LOG.error("Skipping apic host %s, %s did not return anything", host, query)
+                LOG.warning("Skipping apic host %s, %s did not return anything", host, query)
                 continue
 
             for ip in fetched_data['imdata']:
@@ -42,7 +42,7 @@ class ApicIPsCollector (BaseCollector.BaseCollector):
                 if child_nodes:
                     _nodeIds = '+'.join(child_nodes)
 
-                LOG.debug("host: %s, ip: %s, mac: %s, nodes: %s", host, addr, mac, _nodeIds)
+                LOG.info("host: %s, ip: %s, mac: %s, nodes: %s", host, addr, mac, _nodeIds)
 
                 g_dip.add_metric(labels=[host, addr, mac, _nodeIds, tenant], value=1)
 

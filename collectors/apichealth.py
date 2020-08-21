@@ -27,7 +27,7 @@ class ApicHealthCollector (BaseCollector.BaseCollector):
             query = '/api/node/class/topSystem.json?query-target-filter=eq(topSystem.oobMgmtAddr,\"' + host + '\")'
             fetched_data   = self.connection.getRequest(host, query)
             if not self.connection.isDataValid(fetched_data):
-                LOG.error("Skipping apic host %s, %s did not return anything", host, query)
+                LOG.warning("Skipping apic host %s, %s did not return anything", host, query)
                 g_access.add_metric(labels=[host], value=0)
                 continue
             else:
@@ -42,7 +42,7 @@ class ApicHealthCollector (BaseCollector.BaseCollector):
         for host in self.hosts:
             fetched_data   = self.connection.getRequest(host, query)
             if not self.connection.isDataValid(fetched_data):
-                LOG.error("Skipping apic host %s, %s did not return anything", host, query)
+                LOG.warning("Skipping apic host %s, %s did not return anything", host, query)
                 continue
 
             g_cpu.add_metric(labels=[host], value=fetched_data['imdata'][0]['procEntity']['attributes']['cpuPct'])

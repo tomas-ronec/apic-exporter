@@ -35,7 +35,7 @@ class ApicProcessesCollector (BaseCollector.BaseCollector):
         for host in self.hosts:
             fetched_data   = self.connection.getRequest(host, query)
             if not self.connection.isDataValid(fetched_data):
-                LOG.error("Skipping apic host %s, %s did not return anything", host, query)
+                LOG.warning("Skipping apic host %s, %s did not return anything", host, query)
                 continue
 
             # fetch nfm process id from each node
@@ -47,7 +47,7 @@ class ApicProcessesCollector (BaseCollector.BaseCollector):
                 proc_query = '/api/node/class/' + node_dn + '/procProc.json?query-target-filter=eq(procProc.name,"nfm")'
                 proc_data  = self.connection.getRequest(host, proc_query)
                 if not self.connection.isDataValid(proc_data):
-                    LOG.error("Apic host %s node %s has no nfm process", host, node_dn)
+                    LOG.info("Apic host %s node %s has no nfm process", host, node_dn)
                     continue
 
                 # fetch nfm process memory consumption per node
@@ -57,13 +57,13 @@ class ApicProcessesCollector (BaseCollector.BaseCollector):
                     mem_query = '/api/node/mo/' + proc_dn + '/HDprocProcMem5min-0.json'
                     mem_data  = self.connection.getRequest(host, mem_query)
                     if not self.connection.isDataValid(mem_data):
-                        LOG.error("Apic host %s node %s process %s has no memory data", host, node_dn, proc_dn)
+                        LOG.info("Apic host %s node %s process %s has no memory data", host, node_dn, proc_dn)
                         continue
 
                     if int(mem_data['totalCount']) > 0:
                         node_id = self._parseNodeIdInProcDN(proc_dn)
 
-                        LOG.debug("procName: %s, nodeId: %s, role: %s, MemUsedMin: %s, MemUsedMax: %s, MemUsedAvg: %s",
+                        LOG.info("procName: %s, nodeId: %s, role: %s, MemUsedMin: %s, MemUsedMax: %s, MemUsedAvg: %s",
                                   proc_name, node_id, node_role,
                                   mem_data['imdata'][0]['procProcMemHist5min']['attributes']['usedMin'],
                                   mem_data['imdata'][0]['procProcMemHist5min']['attributes']['usedMax'],

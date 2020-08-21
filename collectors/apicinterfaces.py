@@ -25,7 +25,7 @@ class ApicInterfacesCollector (BaseCollector.BaseCollector):
         for host in self.hosts:
             fetched_data   = self.connection.getRequest(host, query)
             if not self.connection.isDataValid(fetched_data):
-                LOG.error("Skipping apic host %s, %s did not return anything", host, query)
+                LOG.warning("Skipping apic host %s, %s did not return anything", host, query)
                 continue
 
             # physical interface reset counter
