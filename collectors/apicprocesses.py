@@ -63,7 +63,7 @@ class ApicProcessesCollector (BaseCollector.BaseCollector):
                     if int(mem_data['totalCount']) > 0:
                         node_id = self._parseNodeIdInProcDN(proc_dn)
 
-                        LOG.info("procName: %s, nodeId: %s, role: %s, MemUsedMin: %s, MemUsedMax: %s, MemUsedAvg: %s",
+                        LOG.debug("procName: %s, nodeId: %s, role: %s, MemUsedMin: %s, MemUsedMax: %s, MemUsedAvg: %s",
                                   proc_name, node_id, node_role,
                                   mem_data['imdata'][0]['procProcMemHist5min']['attributes']['usedMin'],
                                   mem_data['imdata'][0]['procProcMemHist5min']['attributes']['usedMax'],

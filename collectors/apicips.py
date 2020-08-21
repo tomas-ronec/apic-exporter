@@ -42,7 +42,7 @@ class ApicIPsCollector (BaseCollector.BaseCollector):
                 if child_nodes:
                     _nodeIds = '+'.join(child_nodes)
 
-                LOG.info("host: %s, ip: %s, mac: %s, nodes: %s", host, addr, mac, _nodeIds)
+                LOG.debug("host: %s, ip: %s, mac: %s, nodes: %s", host, addr, mac, _nodeIds)
 
                 g_dip.add_metric(labels=[host, addr, mac, _nodeIds, tenant], value=1)
 
