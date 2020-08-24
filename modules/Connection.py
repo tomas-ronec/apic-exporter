@@ -62,6 +62,7 @@ class Connection():
 
         # refresh the cookie
         if resp.status_code == 403 and ("Token was invalid" in resp.text or "token" in resp.text):
+            LOG.debug("Refresh cookie for %s: %s and %s", target, resp.status_code, resp.text)
             self.cookies[target] = self.getCookie(target, self.user, self.password)
 
             try:
