@@ -4,55 +4,80 @@ import json
 
 from urllib3 import disable_warnings
 from urllib3 import exceptions
+from singleton_decorator import singleton
 
 LOG = logging.getLogger('apic_exporter.exporter')
 TIMEOUT = 15
 
-class Connection():
+@singleton
+class SessionPool(object):
 
-    def __init__(self, hosts, user, password):
-        self.user = user
-        self.password = password
-        self.cookies = {}
-        for host in hosts:
-            self.cookies[host] = self.getCookie(host, self.user, self.password)
+    def __init__(self, targets, user, password):
+        self.sessions = {}
+        for target in targets:
+            self.sessions[target] = {}
+            self.sessions[target]['token'], self.sessions[target]['sessionId'] = self.requestToken(target, user=user, password=password)
 
-    def getCookie(self, target, user, password):
+    def setToken(self,target, token, sessionId):
+        self.sessions[target]['token']     = token
+        self.sessions[target]['sessionId'] = sessionId
+
+    def getToken(self, target):
+        return self.sessions[target]['token'], self.sessions[target]['sessionId']
+
+    def requestToken(self, target, **kwargs):
         disable_warnings(exceptions.InsecureRequestWarning)
         proxies = {'https': '', 'http': '', 'no': '*'}
-        LOG.debug("Request cookie for %s", target)
+        LOG.debug("Request new token for %s", target)
 
-        url     = "https://" + target + "/api/aaaLogin.json?"
-        payload = {"aaaUser":{"attributes": {"name": user, "pwd": password}}}
+        user     = kwargs.pop('user', None)
+        password = kwargs.pop('password', None)
+        refresh  = kwargs.pop('refresh', False)
 
         try:
-            resp = requests.post(url, json=payload, proxies=proxies, verify=False, timeout=TIMEOUT)
+            if refresh:
+                url = "https://" + target + "/api/aaaRefresh.json?"
+                resp = requests.get(url, proxies=proxies, verify=False, timeout=TIMEOUT)
+            else:
+                url = "https://" + target + "/api/aaaLogin.json?"
+                payload = {"aaaUser": {"attributes": {"name": user, "pwd": password}}}
+                resp = requests.post(url, json=payload, proxies=proxies, verify=False, timeout=TIMEOUT)
         except ConnectionError as e:
             LOG.error("Cannot connect to %s: %s", url, e)
-            return None
+            return None, None
         except TimeoutError as e:
             LOG.error("Connection with host %s timed out", target)
-            return None
+            return None, None
 
-        cookie = None
+        token, seesionId = None, None
         if resp.status_code == 200:
             res = json.loads(resp.text)
             resp.close()
-            cookie = res['imdata'][0]['aaaLogin']['attributes']['token']
+            token     = res['imdata'][0]['aaaLogin']['attributes']['token']
+            seesionId = res['imdata'][0]['aaaLogin']['attributes']['sessionId']
         else:
             LOG.error("url %s responds with %s", url, resp.status_code)
 
-        return cookie
+        return token, seesionId
 
-    def getRequest(self, target, request):
+class Connection():
+
+    def __init__(self, hosts, user, password):
+        self.user     = user
+        self.password = password
+        self.pool     = SessionPool(hosts, user, password)
+
+    def getRequest(self, target, query):
         disable_warnings(exceptions.InsecureRequestWarning)
         proxies  = {'https': '', 'http': '', 'no': '*'}
 
-        url     = "https://" + target + request
+        url     = "https://" + target + query
         LOG.debug('Submitting request %s', url)
 
+        token, _ = self.pool.getToken(target)
         try:
-            resp = requests.get(url, cookies={"APIC-cookie": self.cookies[target] }, proxies=proxies, verify=False, timeout=TIMEOUT)
+            sess = requests.Session()
+            resp = sess.get(url, cookies={"APIC-cookie": token}, proxies=proxies, verify=False, timeout=TIMEOUT)
         except ConnectionError as e:
             LOG.error("Cannot connect to %s: %s", url, e)
             return None
@@ -60,13 +85,15 @@ class Connection():
             LOG.error("Connection with host %s timed out", target)
             return None
 
-        # refresh the cookie
+        # request a new token
         if resp.status_code == 403 and ("Token was invalid" in resp.text or "token" in resp.text):
-            LOG.debug("Refresh cookie for %s: %s and %s", target, resp.status_code, resp.text)
-            self.cookies[target] = self.getCookie(target, self.user, self.password)
+            LOG.debug("Refresh token for %s: %s and %s", target, resp.status_code, resp.text)
+
+            newToken, newSessionId = self.pool.requestToken(target, user=self.user, password=self.password)
+            self.pool.set(target, newToken, newSessionId)
 
             try:
-                resp = requests.get(url, cookies={"APIC-cookie": self.cookies[target]}, proxies=proxies, verify=False, timeout=TIMEOUT)
+                resp = requests.get(url, cookies={"APIC-cookie": newToken}, proxies=proxies, verify=False, timeout=TIMEOUT)
             except ConnectionError as e:
                 LOG.error("Cannot connect to %s: %s", url, e)
                 return None
