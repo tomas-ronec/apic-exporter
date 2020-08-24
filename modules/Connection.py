@@ -20,6 +20,7 @@ class Connection():
     def getCookie(self, target, user, password):
         disable_warnings(exceptions.InsecureRequestWarning)
         proxies = {'https': '', 'http': '', 'no': '*'}
+        LOG.debug("Request cookie for %s", target)
 
         url     = "https://" + target + "/api/aaaLogin.json?"
         payload = {"aaaUser":{"attributes": {"name": user, "pwd": password}}}
