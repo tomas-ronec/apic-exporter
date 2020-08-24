@@ -72,7 +72,7 @@ class Connection():
                 return None
             except TimeoutError as e:
                 LOG.error("Connection with host %s timed out", target)
-            return None
+                return None
 
         if resp.status_code == 200:
             res = json.loads(resp.text)
