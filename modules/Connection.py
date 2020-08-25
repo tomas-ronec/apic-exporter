@@ -49,8 +49,11 @@ class SessionPool(object):
         except ConnectionError as e:
             LOG.error("Cannot connect to %s: %s", url, e)
             return None, None
+        except requests.exceptions.ConnectTimeout as e:
+            LOG.error("Connection with host %s timed out after %s sec", target, TIMEOUT)
+            return None, None
         except TimeoutError as e:
-            LOG.error("Connection with host %s timed out", target)
+            LOG.error("Connection with host %s timed out after %s sec", target, TIMEOUT)
             return None, None
 
         token, seesionId = None, None
@@ -85,8 +88,11 @@ class Connection():
         except ConnectionError as e:
             LOG.error("Cannot connect to %s: %s", url, e)
             return None
+        except requests.exceptions.ConnectTimeout as e:
+            LOG.error("Connection with host %s timed out after %s sec", target, TIMEOUT)
+            return None
         except TimeoutError as e:
-            LOG.error("Connection with host %s timed out", target)
+            LOG.error("Connection with host %s timed out after %s sec", target, TIMEOUT)
             return None
 
         # request a new token
@@ -100,8 +106,11 @@ class Connection():
             except ConnectionError as e:
                 LOG.error("Cannot connect to %s: %s", url, e)
                 return None
+            except requests.exceptions.ConnectTimeout as e:
+                LOG.error("Connection with host %s timed out after %s sec", target, TIMEOUT)
+                return None
             except TimeoutError as e:
-                LOG.error("Connection with host %s timed out", target)
+                LOG.error("Connection with host %s timed out after %s sec", target, TIMEOUT)
                 return None
 
         if resp.status_code == 200:
