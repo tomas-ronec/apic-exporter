@@ -14,7 +14,7 @@ class ApicInterfacesCollector (BaseCollector.BaseCollector):
 
     @REQUEST_TIME.time()
     def collect(self):
-        LOG.info('Collecting APIC interface metrics ...')
+        LOG.debug('Collecting APIC interface metrics ...')
 
         g = GaugeMetricFamily('network_apic_physcial_interface_reset_counter',
                               'APIC physical interface reset counter',

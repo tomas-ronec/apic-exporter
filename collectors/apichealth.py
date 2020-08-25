@@ -19,7 +19,7 @@ class ApicHealthCollector (BaseCollector.BaseCollector):
 
     @REQUEST_TIME.time()
     def collect(self):
-        LOG.info('Collecting APIC health metrics ...')
+        LOG.debug('Collecting APIC health metrics ...')
 
         g_access = GaugeMetricFamily('network_apic_accessible', 'APIC controller accessibility', labels=['apicHost'])
 

@@ -13,7 +13,7 @@ class ApicIPsCollector (BaseCollector.BaseCollector):
 
     @REQUEST_TIME.time()
     def collect(self):
-        LOG.info('Collecting APIC IP metrics ...')
+        LOG.debug('Collecting APIC IP metrics ...')
 
         g_dip= CounterMetricFamily('network_apic_duplicate_ip_counter',
                                    'Counter for duplicate IPs',
