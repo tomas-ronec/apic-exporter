@@ -90,7 +90,7 @@ class Connection():
             LOG.debug("Refresh token for %s: %s and %s", target, resp.status_code, resp.text)
 
             newToken, newSessionId = self.pool.requestToken(target, user=self.user, password=self.password)
-            self.pool.set(target, newToken, newSessionId)
+            self.pool.setToken(target, newToken, newSessionId)
 
             try:
                 resp = requests.get(url, cookies={"APIC-cookie": newToken}, proxies=proxies, verify=False, timeout=TIMEOUT)
