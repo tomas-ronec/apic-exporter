@@ -28,11 +28,15 @@ class SessionPool(object):
     def requestToken(self, target, **kwargs):
         disable_warnings(exceptions.InsecureRequestWarning)
         proxies = {'https': '', 'http': '', 'no': '*'}
-        LOG.debug("Request new token for %s", target)
 
         user     = kwargs.pop('user', None)
         password = kwargs.pop('password', None)
         refresh  = kwargs.pop('refresh', False)
+
+        if refresh:
+            LOG.info("Refresh token for %s", target)
+        else:
+            LOG.info("Request token for %s", target)
 
         try:
             if refresh:
@@ -87,7 +91,6 @@ class Connection():
 
         # request a new token
         if resp.status_code == 403 and ("Token was invalid" in resp.text or "token" in resp.text):
-            LOG.debug("Refresh token for %s: %s and %s", target, resp.status_code, resp.text)
 
             newToken, newSessionId = self.pool.requestToken(target, user=self.user, password=self.password)
             self.pool.setToken(target, newToken, newSessionId)
