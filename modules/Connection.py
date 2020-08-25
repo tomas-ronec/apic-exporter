@@ -49,10 +49,7 @@ class SessionPool(object):
         except ConnectionError as e:
             LOG.error("Cannot connect to %s: %s", url, e)
             return None, None
-        except requests.exceptions.ConnectTimeout as e:
-            LOG.error("Connection with host %s timed out after %s sec", target, TIMEOUT)
-            return None, None
-        except TimeoutError as e:
+        except ( requests.exceptions.ConnectTimeout,  requests.exceptions.ReadTimeout, TimeoutError ) as e:
             LOG.error("Connection with host %s timed out after %s sec", target, TIMEOUT)
             return None, None
 
@@ -88,10 +85,7 @@ class Connection():
         except ConnectionError as e:
             LOG.error("Cannot connect to %s: %s", url, e)
             return None
-        except requests.exceptions.ConnectTimeout as e:
-            LOG.error("Connection with host %s timed out after %s sec", target, TIMEOUT)
-            return None
-        except TimeoutError as e:
+        except ( requests.exceptions.ConnectTimeout,  requests.exceptions.ReadTimeout, TimeoutError ) as e:
             LOG.error("Connection with host %s timed out after %s sec", target, TIMEOUT)
             return None
 
@@ -106,10 +100,7 @@ class Connection():
             except ConnectionError as e:
                 LOG.error("Cannot connect to %s: %s", url, e)
                 return None
-            except requests.exceptions.ConnectTimeout as e:
-                LOG.error("Connection with host %s timed out after %s sec", target, TIMEOUT)
-                return None
-            except TimeoutError as e:
+            except ( requests.exceptions.ConnectTimeout,  requests.exceptions.ReadTimeout, TimeoutError ) as e:
                 LOG.error("Connection with host %s timed out after %s sec", target, TIMEOUT)
                 return None
 
