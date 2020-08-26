@@ -30,10 +30,8 @@ class ApicHealthCollector (BaseCollector.BaseCollector):
             if not self.connection.isDataValid(fetched_data):
                 LOG.warning("Skipping apic host %s, %s did not return anything", host, query)
                 g_access.add_metric(labels=[host], value=0)
-                continue
             else:
                 g_access.add_metric(labels=[host], value=1)
-
             metric_counter += 1
         yield  g_access
 

@@ -7,7 +7,7 @@ from urllib3 import exceptions
 from singleton_decorator import singleton
 
 LOG = logging.getLogger('apic_exporter.exporter')
-TIMEOUT = 15
+TIMEOUT = 10
 
 @singleton
 class SessionPool(object):
