@@ -1,4 +1,5 @@
 import requests
+from requests import cookies
 import logging
 import json
 
@@ -16,18 +17,33 @@ class SessionPool(object):
         self.sessions = {}
         for target in targets:
             self.sessions[target] = {}
-            self.sessions[target]['token'], self.sessions[target]['sessionId'] = self.requestToken(target, user=user, password=password)
+            self.sessions[target] = self.createSession(target, user=user, password=password)
 
-    def setToken(self,target, token, sessionId):
-        self.sessions[target]['token']     = token
-        self.sessions[target]['sessionId'] = sessionId
+    def getSession(self, target):
+        return self.sessions[target]
 
-    def getToken(self, target):
-        return self.sessions[target]['token'], self.sessions[target]['sessionId']
+    def createSession(self, target, user, password):
+        session = requests.Session()
+        session.proxies =  {'https':'', 'http': '', 'no':'*'}
+        session.verify = False
 
-    def requestToken(self, target, **kwargs):
+        cookie = self.requestCookie(target, session, user=user, password=password)
+        session.cookies = cookies.cookiejar_from_dict(cookie_dict={"APIC-cookie": cookie})
+
+        return session
+    
+    def refreshCookie(self, target, user, password):
+        session = self.sessions[target]
+        session.cookies.clear_session_cookies()
+
+        cookie = self.requestCookie(target, session, user=user, password=password)
+        session.cookies = cookies.cookiejar_from_dict(cookie_dict={"APIC-cookie": cookie}, cookiejar=session.cookies)
+        self.sessions[target] = session
+
+        return session
+
+    def requestCookie(self, target, session, **kwargs):
         disable_warnings(exceptions.InsecureRequestWarning)
-        proxies = {'https': '', 'http': '', 'no': '*'}
 
         user     = kwargs.pop('user', None)
         password = kwargs.pop('password', None)
@@ -41,28 +57,27 @@ class SessionPool(object):
         try:
             if refresh:
                 url = "https://" + target + "/api/aaaRefresh.json?"
-                resp = requests.get(url, proxies=proxies, verify=False, timeout=TIMEOUT)
+                resp = session.get(url, timeout=TIMEOUT)
             else:
                 url = "https://" + target + "/api/aaaLogin.json?"
                 payload = {"aaaUser": {"attributes": {"name": user, "pwd": password}}}
-                resp = requests.post(url, json=payload, proxies=proxies, verify=False, timeout=TIMEOUT)
+                resp = session.post(url, json=payload, timeout=TIMEOUT)
         except ConnectionError as e:
             LOG.error("Cannot connect to %s: %s", url, e)
-            return None, None
+            return None
         except ( requests.exceptions.ConnectTimeout,  requests.exceptions.ReadTimeout, TimeoutError ) as e:
             LOG.error("Connection with host %s timed out after %s sec", target, TIMEOUT)
-            return None, None
+            return None
 
-        token, seesionId = None, None
+        token = None
         if resp.status_code == 200:
             res = json.loads(resp.text)
             resp.close()
             token     = res['imdata'][0]['aaaLogin']['attributes']['token']
-            seesionId = res['imdata'][0]['aaaLogin']['attributes']['sessionId']
         else:
             LOG.error("url %s responds with %s", url, resp.status_code)
 
-        return token, seesionId
+        return token
 
 class Connection():
 
@@ -73,15 +88,14 @@ class Connection():
 
     def getRequest(self, target, query):
         disable_warnings(exceptions.InsecureRequestWarning)
-        proxies  = {'https': '', 'http': '', 'no': '*'}
 
         url     = "https://" + target + query
         LOG.debug('Submitting request %s', url)
 
-        token, _ = self.pool.getToken(target)
+        sess = self.pool.getSession(target)
+
         try:
-            sess = requests.Session()
-            resp = sess.get(url, cookies={"APIC-cookie": token}, proxies=proxies, verify=False, timeout=TIMEOUT)
+            resp = sess.get(url, timeout=TIMEOUT)
         except ConnectionError as e:
             LOG.error("Cannot connect to %s: %s", url, e)
             return None
@@ -92,11 +106,10 @@ class Connection():
         # request a new token
         if resp.status_code == 403 and ("Token was invalid" in resp.text or "token" in resp.text):
 
-            newToken, newSessionId = self.pool.requestToken(target, user=self.user, password=self.password)
-            self.pool.setToken(target, newToken, newSessionId)
+            sess = self.pool.refreshCookie(target, self.user, self.password)
 
             try:
-                resp = requests.get(url, cookies={"APIC-cookie": newToken}, proxies=proxies, verify=False, timeout=TIMEOUT)
+                resp = sess.get(url, timeout=TIMEOUT)
             except ConnectionError as e:
                 LOG.error("Cannot connect to %s: %s", url, e)
                 return None
