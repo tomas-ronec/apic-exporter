@@ -80,6 +80,7 @@ class ApicProcessesCollector (BaseCollector.BaseCollector):
                         g_mem_avg.add_metric(labels=[host, proc_name, node_id, node_role], value=mem_data['imdata'][0]['procProcMemHist5min']['attributes']['usedAvg'])
 
                         metric_counter +=3
+            break   # Each host produces the same metrics.
 
         yield g_mem_min
         yield g_mem_max

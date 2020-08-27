@@ -35,6 +35,7 @@ class ApicInterfacesCollector (BaseCollector.BaseCollector):
                 g.add_metric(labels=[host, item['ethpmPhysIf']['attributes']['dn']],
                              value=item['ethpmPhysIf']['attributes']['resetCtr'])
                 metric_counter += 1
+            break # Each host produces the same metrics.
 
         yield g
 
