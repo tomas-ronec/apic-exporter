@@ -28,11 +28,11 @@ class ApicIPsCollector (BaseCollector.BaseCollector):
                 continue
 
             if len(fetched_data['imdata']) == 0:
-                # Add Empty Counter per Host to have the metric show up in Prometheus.
+                # Add Empty Counter to have the metric show up in Prometheus.
                 # Otherwise they only show when something is wrong and we dont know if it is actually working
                 g_dip.add_metric(labels=[host, '', '', '', ''], value=0)
                 metric_counter += 1
-                continue
+                break   # Each host produces the same metrics.
 
             for ip in fetched_data['imdata']:
                 addr   = ip['fvIp']['attributes']['addr']
@@ -54,6 +54,7 @@ class ApicIPsCollector (BaseCollector.BaseCollector):
                 metric_counter += 1
 
                 g_dip.add_metric(labels=[host, addr, mac, _nodeIds, tenant], value=1)
+            break   # Each host produces the same metrics.
 
         yield g_dip
 
