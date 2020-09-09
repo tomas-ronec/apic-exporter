@@ -27,6 +27,13 @@ class ApicIPsCollector (BaseCollector.BaseCollector):
                 LOG.warning("Skipping apic host %s, %s did not return anything", host, query)
                 continue
 
+            if len(fetched_data['imdata']) == 0:
+                # Add Empty Counter per Host to have the metric show up in Prometheus.
+                # Otherwise they only show when something is wrong and we dont know if it is actually working
+                g_dip.add_metric(labels=[host, '', '', '', ''], value=0)
+                metric_counter += 1
+                continue
+
             for ip in fetched_data['imdata']:
                 addr   = ip['fvIp']['attributes']['addr']
                 dn     = ip['fvIp']['attributes']['dn']
