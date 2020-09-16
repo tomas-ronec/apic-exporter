@@ -1,6 +1,7 @@
 import logging
 import BaseCollector
 from prometheus_client.core import GaugeMetricFamily, Summary
+from typing import List, Dict
 
 LOG = logging.getLogger('apic_exporter.exporter')
 REQUEST_TIME = Summary('apic_health_processing_seconds',
@@ -8,6 +9,11 @@ REQUEST_TIME = Summary('apic_health_processing_seconds',
 
 
 class ApicHealthCollector(BaseCollector.BaseCollector):
+
+    def __init__(self, config: Dict):
+        super().__init__(config)
+        self.__metric_counter = 0
+
     def describe(self):
         yield GaugeMetricFamily('network_apic_accessible',
                                 'APIC controller accessibility')
@@ -21,17 +27,13 @@ class ApicHealthCollector(BaseCollector.BaseCollector):
         yield GaugeMetricFamily('network_apic_free_memory_bytes',
                                 'APIC maximum amount of available memory')
 
-    @REQUEST_TIME.time()
-    def collect(self):
-        LOG.debug('Collecting APIC health metrics ...')
+    def collect_apic_accessible(self) -> GaugeMetricFamily:
+        """Collect the availability of APIC hosts and flag unavailable hosts"""
 
         g_access = GaugeMetricFamily('network_apic_accessible',
                                      'APIC controller accessibility',
                                      labels=['apicHost'])
 
-        self.connection.reset_unavailable_hosts()
-
-        metric_counter = 0
         for host in self.hosts:
             query = '/api/node/class/topSystem.json?query-target-filter=eq(topSystem.oobMgmtAddr,\"' + \
                 host + '\")'
@@ -43,8 +45,11 @@ class ApicHealthCollector(BaseCollector.BaseCollector):
                 g_access.add_metric(labels=[host], value=0)
             else:
                 g_access.add_metric(labels=[host], value=1)
-            metric_counter += 1
-        yield g_access
+            self.__metric_counter += 1
+        return g_access
+
+    def collect_apic_utilization(self) -> List[GaugeMetricFamily]:
+        """Collect the APIC CPU Usage, Memory Allocation and available memory"""
 
         g_cpu = GaugeMetricFamily('network_apic_cpu_usage_percent',
                                   'APIC CPU utilization',
@@ -55,6 +60,8 @@ class ApicHealthCollector(BaseCollector.BaseCollector):
         g_free = GaugeMetricFamily('network_apic_free_memory_kb',
                                    'APIC maximum amount of available memory',
                                    labels=['apicHost'])
+
+        metrics: List[GaugeMetricFamily] = [g_cpu, g_aloc, g_free]
 
         query = '/api/node/class/procEntity.json?'
         for host in self.hosts:
@@ -74,10 +81,26 @@ class ApicHealthCollector(BaseCollector.BaseCollector):
             g_free.add_metric(labels=[host],
                               value=fetched_data['imdata'][0]['procEntity']
                               ['attributes']['memFree'])
-            metric_counter += 3
+            self.__metric_counter += 3
 
-        yield g_cpu
-        yield g_aloc
-        yield g_free
+        return metrics
 
-        LOG.info('Collected %s APIC health metrics', metric_counter)
+
+    @REQUEST_TIME.time()
+    def collect(self):
+        LOG.debug('Collecting APIC health metrics ...')
+
+        self.reset_unavailable_hosts()
+
+        self.__metric_counter = 0
+
+        metrics: List[GaugeMetricFamily] = []
+
+        metrics.append(self.collect_apic_accessible())
+        metrics.extend(self.collect_apic_utilization())
+        metrics.append(self.collect_apic_coop_db_size())
+
+        for metric in metrics:
+            yield metric
+       
+        LOG.info('Collected %s APIC health metrics', self.__metric_counter)

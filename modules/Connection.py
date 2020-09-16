@@ -64,6 +64,9 @@ class SessionPool(object):
             else:
                 self.__sessions[host] = session_tuple(value.session, True)
 
+    def get_unavailable_sessions(self) -> List[str]:
+        return [k for k, v in self.__sessions.items() if v.available == False]
+
     def set_session_unavailable(self, host: str):
         """Set a given host to be unavailable"""
         if host in self.__sessions:
@@ -129,6 +132,7 @@ class Connection():
         self.__pool = SessionPool(hosts, user, password)
 
     def getRequest(self, host: str, query: str) -> Dict:
+        """Perform a GET request against host for the query. Retries if token is invalid.""" 
         disable_warnings(exceptions.InsecureRequestWarning)
 
         url = "https://" + host + query
@@ -146,6 +150,7 @@ class Connection():
                 requests.exceptions.ReadTimeout, TimeoutError) as e:
             LOG.error("Connection with host %s timed out after %s sec", host,
                       TIMEOUT)
+            self.__pool.set_session_unavailable(host)
             return None
         except (requests.exceptions.ConnectionError, ConnectionError) as e:
             LOG.error("Cannot connect to %s: %s", url, e)
@@ -164,6 +169,7 @@ class Connection():
                     requests.exceptions.ReadTimeout, TimeoutError) as e:
                 LOG.error("Connection with host %s timed out after %s sec",
                           host, TIMEOUT)
+                self.__pool.set_session_unavailable(host)
                 return None
             except (requests.exceptions.ConnectionError, ConnectionError):
                 LOG.error("Cannot connect to %s: %s", url, e)
@@ -178,9 +184,9 @@ class Connection():
             LOG.error("url %s responding with %s", url, resp.status_code)
             return None
 
-    def set_host_unavailable(self, host: str):
-        """Flag host as unavailable. Unavailable host is skipped"""
-        self.__pool.set_session_unavailable(host)
+    def get_unresponsive_hosts(self) -> List[str]:
+        """Returns a list of hosts that were not responding since the last reset."""
+        return self.__pool.get_unavailable_sessions()
 
     def reset_unavailable_hosts(self):
         """Unavailable hosts are repaired and the flags are reset"""

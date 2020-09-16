@@ -19,3 +19,11 @@ class BaseCollector(ABC):
     @abstractmethod
     def collect(self):
         pass
+
+    def reset_unavailable_hosts(self):
+        """Reset the list of unavailable hosts. Move the previously unavailable host to the end of the list"""
+        unresponsive_hosts = self.connection.get_unresponsive_hosts()
+        for host in unresponsive_hosts:
+            self.hosts.remove(host)
+            self.hosts.append(host)
+        self.connection.reset_unavailable_hosts()
