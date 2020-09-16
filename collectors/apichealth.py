@@ -98,7 +98,6 @@ class ApicHealthCollector(BaseCollector.BaseCollector):
 
         metrics.append(self.collect_apic_accessible())
         metrics.extend(self.collect_apic_utilization())
-        metrics.append(self.collect_apic_coop_db_size())
 
         for metric in metrics:
             yield metric
