@@ -4,6 +4,7 @@ from prometheus_client.core import GaugeMetricFamily, Summary
 from typing import List, Dict
 
 LOG = logging.getLogger('apic_exporter.exporter')
+TIMEOUT = 5
 REQUEST_TIME = Summary('apic_health_processing_seconds',
                        'Time spent processing request')
 
@@ -37,7 +38,7 @@ class ApicHealthCollector(BaseCollector.BaseCollector):
         for host in self.hosts:
             query = '/api/node/class/topSystem.json?query-target-filter=eq(topSystem.oobMgmtAddr,\"' + \
                 host + '\")'
-            fetched_data = self.connection.getRequest(host, query)
+            fetched_data = self.connection.getRequest(host, query, TIMEOUT)
             if not self.connection.isDataValid(fetched_data):
                 LOG.warning(
                     "Skipping apic host %s, %s did not return anything", host,

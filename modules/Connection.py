@@ -12,6 +12,7 @@ from collections import namedtuple
 
 LOG = logging.getLogger('apic_exporter.exporter')
 TIMEOUT = 10
+COOKIE_TIMEOUT = 5
 session_tuple = namedtuple('session_tuple', 'session available')
 
 
@@ -104,11 +105,11 @@ class SessionPool(object):
                     }
                 }
             }
-            resp = session.post(url, json=payload, timeout=TIMEOUT)
+            resp = session.post(url, json=payload, timeout=COOKIE_TIMEOUT)
         except (requests.exceptions.ConnectTimeout,
                 requests.exceptions.ReadTimeout, TimeoutError) as e:
             LOG.error("Connection with host %s timed out after %s sec", host,
-                      TIMEOUT)
+                      COOKIE_TIMEOUT)
             self.set_session_unavailable(host)
             return None
         except (requests.exceptions.ConnectionError, ConnectionError) as e:
@@ -131,7 +132,7 @@ class Connection():
     def __init__(self, hosts: List[str], user: str, password: str):
         self.__pool = SessionPool(hosts, user, password)
 
-    def getRequest(self, host: str, query: str) -> Dict:
+    def getRequest(self, host: str, query: str, timeout: int = TIMEOUT) -> Dict:
         """Perform a GET request against host for the query. Retries if token is invalid.""" 
         disable_warnings(exceptions.InsecureRequestWarning)
 
@@ -145,11 +146,11 @@ class Connection():
 
         try:
             LOG.debug('Submitting request %s', url)
-            resp = session.get(url, timeout=TIMEOUT)
+            resp = session.get(url, timeout=timeout)
         except (requests.exceptions.ConnectTimeout,
                 requests.exceptions.ReadTimeout, TimeoutError) as e:
             LOG.error("Connection with host %s timed out after %s sec", host,
-                      TIMEOUT)
+                      timeout)
             self.__pool.set_session_unavailable(host)
             return None
         except (requests.exceptions.ConnectionError, ConnectionError) as e:
@@ -164,11 +165,11 @@ class Connection():
             session = self.__pool.refreshCookie(host)
 
             try:
-                resp = session.get(url, timeout=TIMEOUT)
+                resp = session.get(url, timeout=timeout)
             except (requests.exceptions.ConnectTimeout,
                     requests.exceptions.ReadTimeout, TimeoutError) as e:
                 LOG.error("Connection with host %s timed out after %s sec",
-                          host, TIMEOUT)
+                          host, timeout)
                 self.__pool.set_session_unavailable(host)
                 return None
             except (requests.exceptions.ConnectionError, ConnectionError):
