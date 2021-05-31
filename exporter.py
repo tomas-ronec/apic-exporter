@@ -8,7 +8,7 @@ import click
 from prometheus_client.core import REGISTRY
 from prometheus_client import start_http_server
 
-from collectors import apichealth, apicinterfaces, apicprocesses, apicips, apiccoopdb
+from collectors import apichealth, apicinterfaces, apicprocesses, apicips, apiccoopdb, apiceqpt
 
 LOG = logging.getLogger('apic_exporter.exporter')
 
@@ -20,6 +20,7 @@ def run_prometheus_server(port, apic_config):
     REGISTRY.register(apicprocesses.ApicProcessesCollector(apic_config))
     REGISTRY.register(apicips.ApicIPsCollector(apic_config))
     REGISTRY.register(apiccoopdb.ApicCoopDbCollector(apic_config))
+    REGISTRY.register(apiceqpt.ApicEquipmentCollector(apic_config))
     while True:
         time.sleep(1)
 
