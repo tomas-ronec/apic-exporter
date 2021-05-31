@@ -53,6 +53,7 @@ class ApicEquipmentCollector(BaseCollector.BaseCollector):
                     g_flash_rw.add_metric(labels=[host, flash.nodeId, flash.type, flash.vendor, flash.model], value=1)
                 else:
                     g_flash_rw.add_metric(labels=[host, flash.nodeId, flash.type, flash.vendor, flash.model], value=0)
+                self.__metric_counter += 1
 
             break  # Each host produces the same metrics
 
