@@ -17,13 +17,13 @@ class ApicEquipmentCollector(BaseCollector.BaseCollector):
         self.__metric_counter = 0
 
     def describe(self):
-        yield GaugeMetricFamily('network_apic_flash_rw',
+        yield GaugeMetricFamily('network_apic_flash_readwrite',
                                 'APIC flash is read and writeable')
 
     def collect_flash(self) -> GaugeMetricFamily:
         """Collect read-write status of flash equipment"""
 
-        g_flash_rw = GaugeMetricFamily('network_apic_flash_rw',
+        g_flash_rw = GaugeMetricFamily('network_apic_flash_readwrite',
                                        'APIC flash is read and writeable',
                                        labels=['apicHost', 'node', 'type', 'vendor', 'model'])
 
