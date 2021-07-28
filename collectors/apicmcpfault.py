@@ -30,24 +30,24 @@ class ApicIPsCollector(BaseCollector.BaseCollector):
                 LOG.warning(
                     "Skipping apic host %s, %s did not return anything", host,
                     query)
-                continue
+            continue
 
-                if len(fetched_data['imdata']) == 0:
-                output = json.loads(query.text)
-                # Add Empty Counter to have the metric show up in Prometheus.
-                # Otherwise they only show when something is wrong and we dont know if it is actually working
-                g_dip.add_metric(labels=[host, '', '', ''], value=0)
-                metric_counter += 1
-                break  # Each host produces the same metrics.
-                count = int(fetched_data['totalCount'])
-                for x in range(0, int(count)):
-                    if (output['imdata'][x]['faultInst']['attributes']['lc'] =='raised') or (output['imdata'][x]['faultInst']['attributes']['lc'] =='soaking'):
-                        fault_lifecyle = output['imdata'][x]['faultInst']['attributes']['lc']
-                        fault_summary =  output['imdata'][x]['faultInst']['attributes']['dn']
-                        fault_desc =  output['imdata'][x]['faultInst']['attributes']['descr']
+            if len(fetched_data['imdata']) == 0:
+            output = json.loads(query.text)
+            # Add Empty Counter to have the metric show up in Prometheus.
+            # Otherwise they only show when something is wrong and we dont know if it is actually working
+            g_dip.add_metric(labels=[host, '', '', ''], value=0)
+            metric_counter += 1
+            break  # Each host produces the same metrics.
+            count = int(fetched_data['totalCount'])
+            for x in range(0, int(count)):
+                if (output['imdata'][x]['faultInst']['attributes']['lc'] =='raised') or (output['imdata'][x]['faultInst']['attributes']['lc'] =='soaking'):
+                    fault_lifecyle = output['imdata'][x]['faultInst']['attributes']['lc']
+                    fault_summary =  output['imdata'][x]['faultInst']['attributes']['dn']
+                    fault_desc =  output['imdata'][x]['faultInst']['attributes']['descr']
 
-                        LOG.debug("host: %s, ip: %s", fault_lifecyle, fault_summary, fault_desc)
-                        metric_counter += 1
+                    LOG.debug("host: %s, ip: %s", fault_lifecyle, fault_summary, fault_desc)
+                    metric_counter += 1
 
                         g_dip.add_metric(labels=[host, fault_lifecyle, fault_summary, fault_desc],
                                  value=1)
