@@ -4,7 +4,7 @@ from prometheus_client.core import CounterMetricFamily, Summary
 import BaseCollector
 
 LOG = logging.getLogger('apic_exporter.exporter')
-REQUEST_TIME = Summary('apic_ips_processing_seconds',
+REQUEST_TIME = Summary('network_apic_mcp_fault_counter',
                        'Time spent processing request')
 
 
@@ -15,7 +15,7 @@ class ApicIPsCollector(BaseCollector.BaseCollector):
 
     @REQUEST_TIME.time()
     def collect(self):
-        LOG.debug('Collecting APIC IP metrics ...')
+        LOG.debug('Collecting APIC MCP Fault metrics ...')
 
         g_dip = CounterMetricFamily(
             'network_apic_mcp_fault_counter',
@@ -55,4 +55,4 @@ class ApicIPsCollector(BaseCollector.BaseCollector):
 
         yield g_dip
 
-        LOG.info('Collected %s APIC IP metrics', metric_counter)
+        LOG.info('Collected %s APIC MCP Fault metrics', metric_counter)
