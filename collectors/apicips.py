@@ -17,7 +17,7 @@ class ApicIPsCollector(BaseCollector.BaseCollector):
     def collect(self):
         LOG.debug('Collecting APIC IP metrics ...')
 
-        g_dip = CounterMetricFamily(
+        c_dip = CounterMetricFamily(
             'network_apic_duplicate_ip_counter',
             'Counter for duplicate IPs',
             labels=['apicHost', 'ip', 'mac', 'nodeId', 'tenant'])
@@ -35,7 +35,7 @@ class ApicIPsCollector(BaseCollector.BaseCollector):
             if len(fetched_data['imdata']) == 0:
                 # Add Empty Counter to have the metric show up in Prometheus.
                 # Otherwise they only show when something is wrong and we dont know if it is actually working
-                g_dip.add_metric(labels=[host, '', '', '', ''], value=0)
+                c_dip.add_metric(labels=[host, '', '', '', ''], value=0)
                 metric_counter += 1
                 break  # Each host produces the same metrics.
 
@@ -58,10 +58,10 @@ class ApicIPsCollector(BaseCollector.BaseCollector):
                 LOG.debug("host: %s, ip: %s, mac: %s, nodes: %s", host, addr, mac, _nodeIds)
                 metric_counter += 1
 
-                g_dip.add_metric(labels=[host, addr, mac, _nodeIds, tenant],
+                c_dip.add_metric(labels=[host, addr, mac, _nodeIds, tenant],
                                  value=1)
             break  # Each host produces the same metrics.
 
-        yield g_dip
+        yield c_dip
 
         LOG.info('Collected %s APIC IP metrics', metric_counter)
