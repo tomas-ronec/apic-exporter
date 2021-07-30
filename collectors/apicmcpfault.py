@@ -17,7 +17,7 @@ class ApicMCPCollector(BaseCollector.BaseCollector):
     def collect(self):
         LOG.debug('Collecting APIC MCP Fault metrics ...')
 
-        g_dip = CounterMetricFamily(
+        c_mcp_faults = CounterMetricFamily(
             'network_apic_mcp_fault_counter',
             'Counter for MCP Faults',
             labels=['apicHost', 'ip', 'fault_lifecyle', 'fault_summary', 'fault_desc'])
@@ -36,7 +36,7 @@ class ApicMCPCollector(BaseCollector.BaseCollector):
                 output = json.loads(query.text)
                 # Add Empty Counter to have the metric show up in Prometheus.
                 # Otherwise they only show when something is wrong and we dont know if it is actually working
-                g_dip.add_metric(labels=[host, '', '', ''], value=0)
+                c_mcp_faults.add_metric(labels=[host, '', '', ''], value=0)
                 metric_counter += 1
                 break  # Each host produces the same metrics.
             count = int(fetched_data['totalCount'])
@@ -49,10 +49,10 @@ class ApicMCPCollector(BaseCollector.BaseCollector):
                     LOG.debug("host: %s, ip: %s", fault_lifecyle, fault_summary, fault_desc)
                     metric_counter += 1
 
-                    g_dip.add_metric(labels=[host, fault_lifecyle, fault_summary, fault_desc],
+                    c_mcp_faults.add_metric(labels=[host, fault_lifecyle, fault_summary, fault_desc],
                                  value=1)
             break  # Each host produces the same metrics.
 
-        yield g_dip
+        yield c_mcp_faults
 
         LOG.info('Collected %s APIC MCP Fault metrics', metric_counter)
