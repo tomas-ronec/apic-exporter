@@ -1,4 +1,4 @@
-import logging, re
+import logging
 
 from prometheus_client.core import CounterMetricFamily, Summary
 import BaseCollector
