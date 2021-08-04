@@ -43,8 +43,8 @@ class ApicMCPCollector(BaseCollector.BaseCollector):
             for x in range(0, int(count)):
                 if (output['imdata'][x]['faultInst']['attributes']['lc'] =='raised') or (output['imdata'][x]['faultInst']['attributes']['lc'] =='soaking'):
                     fault_lifecyle = output['imdata'][x]['faultInst']['attributes']['lc']
-                    fault_summary =  output['imdata'][x]['faultInst']['attributes']['dn']
-                    fault_desc =  output['imdata'][x]['faultInst']['attributes']['descr']
+                    fault_summary = output['imdata'][x]['faultInst']['attributes']['dn']
+                    fault_desc = output['imdata'][x]['faultInst']['attributes']['descr']
 
                     LOG.debug("host: %s, ip: %s", fault_lifecyle, fault_summary, fault_desc)
                     metric_counter += 1
