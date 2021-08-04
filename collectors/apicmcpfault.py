@@ -36,7 +36,7 @@ class ApicMCPCollector(BaseCollector.BaseCollector):
                 output = json.loads(query.text)
                 # Add Empty Counter to have the metric show up in Prometheus.
                 # Otherwise they only show when something is wrong and we dont know if it is actually working
-                c_mcp_faults.add_metric(labels=[host, '', '', ''], value=0)
+                c_mcp_faults.add_metric(labels=[host, '', '', ''], 0)
                 metric_counter += 1
                 break  # Each host produces the same metrics.
             count = int(fetched_data['totalCount'])
