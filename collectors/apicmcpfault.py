@@ -4,7 +4,7 @@ from prometheus_client.core import CounterMetricFamily, Summary
 import BaseCollector
 
 LOG = logging.getLogger('apic_exporter.exporter')
-REQUEST_TIME = Summary('network_apic_mcp_fault_counter',
+REQUEST_TIME = Summary('apic_mcp_faults_processing_seconds',
                        'Time spent processing request')
 
 
@@ -47,8 +47,7 @@ class ApicMCPCollector(BaseCollector.BaseCollector):
                     LOG.debug("host: %s, ip: %s", fault_lifecyle, fault_summary, fault_desc)
                     metric_counter += 1
 
-                    c_mcp_faults.add_metric(labels=[host, fault_lifecyle, fault_summary, fault_desc],
-                                 value=1)
+                    c_mcp_faults.add_metric(labels=[host, fault_lifecyle, fault_summary, fault_desc], value=1)
             break  # Each host produces the same metrics.
 
         yield c_mcp_faults
