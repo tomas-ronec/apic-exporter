@@ -44,7 +44,7 @@ class ApicMCPCollector(BaseCollector.BaseCollector):
                     fault_summary = fetched_data['imdata'][x]['faultInst']['attributes']['dn']
                     fault_desc = fetched_data['imdata'][x]['faultInst']['attributes']['descr']
 
-                    LOG.debug("host: %s, fault_lifecyle, fault_summary, fault_desc)
+                    LOG.debug("host: %s", fault_lifecyle, fault_summary, fault_desc)
                     metric_counter += 1
 
                     c_mcp_faults.add_metric(labels=[host, fault_summary, fault_desc, fault_lifecyle], value=1)
