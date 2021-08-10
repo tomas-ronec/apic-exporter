@@ -20,7 +20,7 @@ class ApicMCPCollector(BaseCollector.BaseCollector):
         c_mcp_faults = CounterMetricFamily(
             'network_apic_mcp_fault_counter',
             'Counter for MCP Faults',
-            labels=['apicHost', 'ip', 'fault_lifecyle', 'fault_summary', 'fault_desc'])
+            labels=['apicHost', 'fault_summary', 'fault_desc', 'fault_lifecyle'])
 
         metric_counter = 0
         query = "/api/node/class/faultInst.json?query-target-filter=or(eq(faultInst.code,\"F2533\"),eq(faultInst.code,\"F2534\"))"
@@ -44,10 +44,10 @@ class ApicMCPCollector(BaseCollector.BaseCollector):
                     fault_summary = fetched_data['imdata'][x]['faultInst']['attributes']['dn']
                     fault_desc = fetched_data['imdata'][x]['faultInst']['attributes']['descr']
 
-                    LOG.debug("host: %s, ip: %s", fault_lifecyle, fault_summary, fault_desc)
+                    LOG.debug("host: %s", fault_lifecyle, fault_summary, fault_desc)
                     metric_counter += 1
 
-                    c_mcp_faults.add_metric(labels=[host, fault_lifecyle, fault_summary, fault_desc], value=1)
+                    c_mcp_faults.add_metric(labels=[host, fault_summary, fault_desc, fault_lifecyle], value=1)
             break  # Each host produces the same metrics.
 
         yield c_mcp_faults
