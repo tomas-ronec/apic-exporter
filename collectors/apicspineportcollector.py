@@ -69,7 +69,7 @@ class ApicSpinePortsCollector(BaseCollector.BaseCollector):
 					for port_dict in x['topSystem']['children']:
 						if (port_dict['l1PhysIf']['attributes']['adminSt'] == 'up') and (port_dict['l1PhysIf']['children'][0]['ethpmPhysIf']['attributes']['operSt'] == 'down'):
 							port_number = port_dict['l1PhysIf']['attributes']['id']
-							free_port.append(str(port_number))
+                            free_port_count += 1
 						elif (port_dict['l1PhysIf']['attributes']['adminSt'] == 'up') and (port_dict['l1PhysIf']['children'][0]['ethpmPhysIf']['attributes']['operSt'] == 'up'):
 							port_number = port_dict['l1PhysIf']['attributes']['id']
 							used_port.append(str(port_number))
