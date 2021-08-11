@@ -41,7 +41,7 @@ class ApicSpinePortsCollector(BaseCollector.BaseCollector):
             labels=['apicHost', 'Spine_id', 'podId'])
 
         metric_counter = 0
-			query_url = "/api/node/class/fabricNode.json?&query-target-filter=eq(fabricNode.role,"spine")&order-by=fabricNode.id|asc"
+        query_url = '/api/node/class/fabricNode.json?&query-target-filter=eq(fabricNode.role,"spine")&order-by=fabricNode.id|asc'
             query = requests.get(url=query_url, cookies=cookies,headers=headers,timeout=60, verify=False)
 			output  = json.loads(query.text)
 			count = output['totalCount']
