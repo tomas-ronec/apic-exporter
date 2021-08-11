@@ -45,7 +45,6 @@ class ApicSpinePortsCollector(BaseCollector.BaseCollector):
             query = requests.get(url=query_url, cookies=cookies,headers=headers,timeout=60, verify=False)
 			output  = json.loads(query.text)
 			count = output['totalCount']
-			global spine_dn_list, dn
 			spine_dn_list = []
 			for x in range(0, int(count)):
 				dn = str(output['imdata'][x]['fabricNode']['attributes']['dn'])
