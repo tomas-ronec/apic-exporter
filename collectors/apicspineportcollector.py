@@ -8,6 +8,9 @@ REQUEST_TIME = Summary('apic_spine_ports_counter',
 
 
 class ApicSpinePortsCollector(BaseCollector.BaseCollector):
+    def __init__(self, config: Dict):
+        super().__init__(config)
+        self.__metric_counter = 0
     def describe(self):
         yield GaugeMetricFamily('free_port_count',
                                 'Total available free ports')
