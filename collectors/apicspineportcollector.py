@@ -63,13 +63,13 @@ class ApicSpinePortsCollector(BaseCollector.BaseCollector):
                     spine_id = x['topSystem']['attributes']['id']
                     for port_dict in x['topSystem']['children']:
                         if (port_dict['l1PhysIf']['attributes']['adminSt'] == 'up') and (port_dict['l1PhysIf']['children'][0]['ethpmPhysIf']['attributes']['operSt'] == 'down'):
-                            port_number = port_dict['l1PhysIf']['attributes']['id']
+                            free_port_count = port_dict['l1PhysIf']['attributes']['id']
                             free_port_count += 1
                         elif (port_dict['l1PhysIf']['attributes']['adminSt'] == 'up') and (port_dict['l1PhysIf']['children'][0]['ethpmPhysIf']['attributes']['operSt'] == 'up'):
-                            port_number = port_dict['l1PhysIf']['attributes']['id']
+                            used_port_count = port_dict['l1PhysIf']['attributes']['id']
                             used_port_count +=1
                         elif port_dict['l1PhysIf']['attributes']['adminSt'] == 'down':
-                            port_number = port_dict['l1PhysIf']['attributes']['id']
+                            down_port_count = port_dict['l1PhysIf']['attributes']['id']
                             down_port_count +=1
                     # Free Ports
                     g_free_port.add_metric(
