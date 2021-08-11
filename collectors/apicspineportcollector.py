@@ -76,7 +76,6 @@ class ApicSpinePortsCollector(BaseCollector.BaseCollector):
 						elif port_dict['l1PhysIf']['attributes']['adminSt'] == 'down':
 							port_number = port_dict['l1PhysIf']['attributes']['id']
 							down_port.append(str(port_number))
-				free_port_count = len(free_port)
 				used_port_count = len(used_port)
 				down_port_count = len(down_port)
 					# Free Ports
