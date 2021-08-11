@@ -60,7 +60,7 @@ class ApicSpinePortsCollector(BaseCollector.BaseCollector):
 				query = requests.get(url=query_url, cookies=cookies,headers=headers, timeout=60, verify=False)
 				output  = json.loads(query.text)
 				global pod_id, spine_id, free_port,free_port_count,used_port,used_port_count,down_port,down_port_count
-				free_port = []
+				free_port_count = 0
 				used_port = []
 				down_port = []
 				for x in output['imdata']:
