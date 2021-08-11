@@ -79,7 +79,7 @@ class ApicSpinePortsCollector(BaseCollector.BaseCollector):
 				used_port_count = len(used_port)
 				down_port_count = len(down_port)
 					# Free Ports
-					g_free_port_count.add_metric(
+					g_free_port.add_metric(
 						labels=[host, spine_id, podId],
 						value=free_port_count
 
