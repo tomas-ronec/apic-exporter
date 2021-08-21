@@ -39,7 +39,6 @@ class ApicSpinePortsCollector(BaseCollector.BaseCollector):
             'In-use but down ports',
             labels=['apicHost', 'Spine_id', 'podId'])
 
-        metric_counter = 0
         query_url = '/api/node/class/fabricNode.json?&query-target-filter=eq(fabricNode.role,"spine")&order-by=fabricNode.id|asc'
         for host in self.hosts:
             query = self.connection.getRequest(host, query_url)
@@ -73,22 +72,23 @@ class ApicSpinePortsCollector(BaseCollector.BaseCollector):
                             down_port_count +=1
                     # Free Ports
                     g_free_port.add_metric(
-                        labels=[host, spine_id, 'podId'],
-                        value=free_port_count
+                        labels=[host, spine_id, podId],
+                        value=free_port_count)
 
                     # Used Ports
                     g_used_port.add_metric(
-                        labels=[host, spine_id, 'podId'],
-                        value=used_port_count
+                        labels=[host, spine_id, podId],
+                        value=used_port_count)
                     
                     # Down ports
                     g_down_port.add_metric(
-                        labels=[host, spine_id, 'podId'],
-                        value=down_port_count
+                        labels=[host, spine_id, podId],
+                        value=down_port_count)
+                   add self.__metric_counter += 1 
             break  # Each host produces the same metrics.
 
         yield g_free_port_count
         yield g_used_port_count
         yield g_down_port_count
 
-        LOG.info('Collected %s APIC Spine ports metrics')
+        LOG.info('Collected %s APIC Spine ports metrics', self.__metric_counter)
