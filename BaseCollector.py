@@ -9,8 +9,8 @@ LOG = logging.getLogger('apic_exporter.exporter')
 class BaseCollector(ABC):
     def __init__(self, config: Dict):
         self.hosts: List[str] = config['apic_hosts'].split(',')
-        self.connection = Connection(self.hosts, config['apic_user'],
-                                     config['apic_password'])
+        self.__connection = Connection(self.hosts, config['apic_user'],
+                                       config['apic_password'])
 
     @abstractmethod
     def describe(self):
@@ -20,10 +20,23 @@ class BaseCollector(ABC):
     def collect(self):
         pass
 
+    def query_host(self, host: str, query: str, timeout: int = None) -> Dict:
+        """Executes the query against a specific APIC host and returns the fetched data or None if fetched data is invalid"""
+
+        fetched_data = (self.__connection.getRequest(host, query, timeout)
+                        if timeout is not None
+                        else self.__connection.getRequest(host, query))
+        if not self.__connection.isDataValid(fetched_data):
+            LOG.warning(
+                "Apic host %s, %s did not return anything", host,
+                query)
+            return None
+        return fetched_data
+
     def reset_unavailable_hosts(self):
         """Reset the list of unavailable hosts. Move the previously unavailable host to the end of the list"""
-        unresponsive_hosts = self.connection.get_unresponsive_hosts()
+        unresponsive_hosts = self.__connection.get_unresponsive_hosts()
         for host in unresponsive_hosts:
             self.hosts.remove(host)
             self.hosts.append(host)
-        self.connection.reset_unavailable_hosts()
+        self.__connection.reset_unavailable_hosts()
