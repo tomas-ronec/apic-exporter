@@ -8,7 +8,7 @@ There are two ways to add further metrics. One is extending the [BaseCollector](
 
 When extending from the `BaseCollector` the client has to take care of edge-cases such as the host not answering. The `StandardCollector` takes care of these things and requires solely the logic for creating the Prometheus metrics from query results.
 
-If you want to contribute additional metrics take the [ApicCoopDbCollector](collectors/apiccoobdb.py) as an Example.
+If you want to contribute additional metrics take the [ApicCoopDbCollector](collectors/apiccoopdb.py) as an Example.
 Here the metrics are defined as a List of `CustomMetric` objects. Each of these objects contains the name of the metric, the query required to fetch the data from the APIC hosts and a method which processes this data. This method is responsible for creating the Prometheus metric from the fetched data.
 
 ## Docker
