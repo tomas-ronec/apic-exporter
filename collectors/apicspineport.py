@@ -1,4 +1,4 @@
-import re, logging, json
+import logging
 import BaseCollector
 from prometheus_client.core import GaugeMetricFamily, Summary
 from typing import Dict
@@ -7,10 +7,12 @@ LOG = logging.getLogger('apic_exporter.exporter')
 REQUEST_TIME = Summary('apic_spine_ports_counter',
                        'Time spent processing request')
 
+
 class ApicSpinePortsCollector(BaseCollector.BaseCollector):
     def __init__(self, config: Dict):
         super().__init__(config)
         self.__metric_counter = 0
+
     def describe(self):
         yield GaugeMetricFamily('free_port_count',
                                 'Total available free ports')
@@ -31,7 +33,7 @@ class ApicSpinePortsCollector(BaseCollector.BaseCollector):
             labels=['apicHost', 'Spine_id', 'podId'])
 
         g_used_port = GaugeMetricFamily(
-          'used_port_count',
+            'used_port_count',
             'Total in-use ports',
             labels=['apicHost', 'Spine_id', 'podId'])
 
@@ -40,7 +42,8 @@ class ApicSpinePortsCollector(BaseCollector.BaseCollector):
             'In-use but down ports',
             labels=['apicHost', 'Spine_id', 'podId'])
 
-        query_url = '/api/node/class/fabricNode.json?&query-target-filter=eq(fabricNode.role,"spine")&order-by=fabricNode.id|asc'
+        query_url = '/api/node/class/fabricNode.json?' + \
+                    '&query-target-filter=eq(fabricNode.role,"spine")&order-by=fabricNode.id|asc'
         for host in self.hosts:
             output = self.connection.getRequest(host, query_url)
             # output  = json.loads(query.text)
@@ -52,9 +55,7 @@ class ApicSpinePortsCollector(BaseCollector.BaseCollector):
 
             # fetch physcal port from each spine
             for dn in spine_dn_list:
-                query_url = '/api/node/mo/'+ dn +'/sys.json?rsp-subtree=full&rsp-subtree-class=ethpmPhysIf'
-                output = self.connection.getRequest(host, query_url)
-                # output  = json.loads(query.text)
+                query_url = '/api/node/mo/' + dn + '/sys.json?rsp-subtree=full&rsp-subtree-class=ethpmPhysIf'
                 free_port_count = 0
                 used_port_count = 0
                 down_port_count = 0
@@ -62,15 +63,17 @@ class ApicSpinePortsCollector(BaseCollector.BaseCollector):
                     pod_id = x['topSystem']['attributes']['podId']
                     spine_id = x['topSystem']['attributes']['id']
                     for port_dict in x['topSystem']['children']:
-                        if (port_dict['l1PhysIf']['attributes']['adminSt'] == 'up') and (port_dict['l1PhysIf']['children'][0]['ethpmPhysIf']['attributes']['operSt'] == 'down'):
+                        if (port_dict['l1PhysIf']['attributes']['adminSt'] == 'up'
+                           and port_dict['l1PhysIf']['children'][0]['ethpmPhysIf']['attributes']['operSt'] == 'down'):
                             free_port_count = port_dict['l1PhysIf']['attributes']['id']
                             free_port_count += 1
-                        elif (port_dict['l1PhysIf']['attributes']['adminSt'] == 'up') and (port_dict['l1PhysIf']['children'][0]['ethpmPhysIf']['attributes']['operSt'] == 'up'):
+                        elif (port_dict['l1PhysIf']['attributes']['adminSt'] == 'up'
+                              and port_dict['l1PhysIf']['children'][0]['ethpmPhysIf']['attributes']['operSt'] == 'up'):
                             used_port_count = port_dict['l1PhysIf']['attributes']['id']
-                            used_port_count +=1
+                            used_port_count += 1
                         elif port_dict['l1PhysIf']['attributes']['adminSt'] == 'down':
                             down_port_count = port_dict['l1PhysIf']['attributes']['id']
-                            down_port_count +=1
+                            down_port_count += 1
 
                         # Free Ports
                         g_free_port.add_metric(
@@ -81,7 +84,7 @@ class ApicSpinePortsCollector(BaseCollector.BaseCollector):
                         g_used_port.add_metric(
                             labels=[host, spine_id, pod_id],
                             value=used_port_count)
-                    
+
                         # Down ports
                         g_down_port.add_metric(
                             labels=[host, spine_id, pod_id],

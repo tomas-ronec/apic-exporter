@@ -1,4 +1,6 @@
-import re, logging
+import logging
+import re
+
 import BaseCollector
 from prometheus_client.core import GaugeMetricFamily, Summary
 

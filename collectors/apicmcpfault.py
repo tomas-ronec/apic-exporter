@@ -23,8 +23,8 @@ class ApicMCPCollector(BaseCollector.BaseCollector):
             labels=['apicHost', 'fault_summary', 'fault_desc', 'fault_lifecyle'])
 
         metric_counter = 0
-        query = "/api/node/class/faultInst.json?query-target-filter=or(eq(faultInst.code,\"F2533\"),eq(faultInst.code,\"F2534\"))"
-        for host in self.hosts: 
+        query = "/api/node/class/faultInst.json" + \
+                "?query-target-filter=or(eq(faultInst.code,\"F2533\"),eq(faultInst.code,\"F2534\"))"
             fetched_data = self.connection.getRequest(host, query)
             if not self.connection.isDataValid(fetched_data):
                 LOG.warning(
@@ -39,7 +39,8 @@ class ApicMCPCollector(BaseCollector.BaseCollector):
                 break  # Each host produces the same metrics.
             count = int(fetched_data['totalCount'])
             for x in range(0, int(count)):
-                if (fetched_data['imdata'][x]['faultInst']['attributes']['lc'] =='raised') or (fetched_data['imdata'][x]['faultInst']['attributes']['lc'] =='soaking'):
+                if (fetched_data['imdata'][x]['faultInst']['attributes']['lc'] == 'raised'
+                   or fetched_data['imdata'][x]['faultInst']['attributes']['lc'] == 'soaking'):
                     fault_lifecyle = fetched_data['imdata'][x]['faultInst']['attributes']['lc']
                     fault_summary = fetched_data['imdata'][x]['faultInst']['attributes']['dn']
                     fault_desc = fetched_data['imdata'][x]['faultInst']['attributes']['descr']

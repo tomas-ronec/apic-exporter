@@ -38,11 +38,11 @@ class SessionPool(object):
         session.verify = False
 
         cookie = self.requestCookie(host, session)
-        if cookie != None:
+        if cookie is not None:
             session.cookies = cookies.cookiejar_from_dict(
                 cookie_dict={"APIC-cookie": cookie})
 
-        available = True if session != None and cookie != None else False
+        available = True if session is not None and cookie is not None else False
 
         return session_tuple(session, available)
 
@@ -56,7 +56,7 @@ class SessionPool(object):
 
             if len(value.session.cookies) == 0:
                 cookie = self.requestCookie(host, value.session)
-                if cookie != None:
+                if cookie is not None:
                     value.session.cookies = cookies.cookiejar_from_dict(
                         cookie_dict={"APIC-cookie": cookie})
                     self.__sessions[host] = session_tuple(value.session, True)
@@ -66,7 +66,7 @@ class SessionPool(object):
                 self.__sessions[host] = session_tuple(value.session, True)
 
     def get_unavailable_sessions(self) -> List[str]:
-        return [k for k, v in self.__sessions.items() if v.available == False]
+        return [k for k, v in self.__sessions.items() if not v.available]
 
     def set_session_unavailable(self, host: str):
         """Set a given host to be unavailable"""
@@ -81,7 +81,7 @@ class SessionPool(object):
 
         cookie = self.requestCookie(host, session)
 
-        if cookie != None:
+        if cookie is not None:
             session.cookies.clear_session_cookies()
             session.cookies = cookies.cookiejar_from_dict(
                 cookie_dict={"APIC-cookie": cookie}, cookiejar=session.cookies)
@@ -107,7 +107,7 @@ class SessionPool(object):
             }
             resp = session.post(url, json=payload, timeout=COOKIE_TIMEOUT)
         except (requests.exceptions.ConnectTimeout,
-                requests.exceptions.ReadTimeout, TimeoutError) as e:
+                requests.exceptions.ReadTimeout, TimeoutError):
             LOG.error("Connection with host %s timed out after %s sec", host,
                       COOKIE_TIMEOUT)
             self.set_session_unavailable(host)
@@ -133,7 +133,7 @@ class Connection():
         self.__pool = SessionPool(hosts, user, password)
 
     def getRequest(self, host: str, query: str, timeout: int = TIMEOUT) -> Dict:
-        """Perform a GET request against host for the query. Retries if token is invalid.""" 
+        """Perform a GET request against host for the query. Retries if token is invalid."""
         disable_warnings(exceptions.InsecureRequestWarning)
 
         url = "https://" + host + query
@@ -148,7 +148,7 @@ class Connection():
             LOG.debug('Submitting request %s', url)
             resp = session.get(url, timeout=timeout)
         except (requests.exceptions.ConnectTimeout,
-                requests.exceptions.ReadTimeout, TimeoutError) as e:
+                requests.exceptions.ReadTimeout, TimeoutError):
             LOG.error("Connection with host %s timed out after %s sec", host,
                       timeout)
             self.__pool.set_session_unavailable(host)
@@ -167,12 +167,12 @@ class Connection():
             try:
                 resp = session.get(url, timeout=timeout)
             except (requests.exceptions.ConnectTimeout,
-                    requests.exceptions.ReadTimeout, TimeoutError) as e:
+                    requests.exceptions.ReadTimeout, TimeoutError):
                 LOG.error("Connection with host %s timed out after %s sec",
                           host, timeout)
                 self.__pool.set_session_unavailable(host)
                 return None
-            except (requests.exceptions.ConnectionError, ConnectionError):
+            except (requests.exceptions.ConnectionError, ConnectionError) as e:
                 LOG.error("Cannot connect to %s: %s", url, e)
                 self.__pool.set_session_unavailable(host)
                 return None
