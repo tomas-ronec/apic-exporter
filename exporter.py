@@ -8,8 +8,7 @@ import click
 from prometheus_client.core import REGISTRY
 from prometheus_client import start_http_server
 
-from collectors import apichealth, apicinterfaces, apicprocesses, apicips, apiccoopdb, apiceqpt, apicmcpfault
-
+from collectors import apicspineport, apichealth, apicinterfaces, apicprocesses, apicips, apiccoopdb, apiceqpt, apicmcpfault
 LOG = logging.getLogger('apic_exporter.exporter')
 
 
@@ -22,6 +21,7 @@ def run_prometheus_server(port, apic_config):
     REGISTRY.register(apiccoopdb.ApicCoopDbCollector(apic_config))
     REGISTRY.register(apiceqpt.ApicEquipmentCollector(apic_config))
     REGISTRY.register(apicmcpfault.ApicMCPCollector(apic_config))
+    REGISTRY.register(apicspineport.ApicSpinePortsCollector(apic_config))
     while True:
         time.sleep(1)
 
