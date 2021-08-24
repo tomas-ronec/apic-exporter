@@ -1,4 +1,5 @@
-import logging, re
+import logging
+import re
 
 from prometheus_client.core import CounterMetricFamily, Summary
 import BaseCollector
@@ -23,7 +24,8 @@ class ApicIPsCollector(BaseCollector.BaseCollector):
             labels=['apicHost', 'ip', 'mac', 'nodeId', 'tenant'])
 
         metric_counter = 0
-        query = '/api/node/class/fvIp.json?rsp-subtree=full&rsp-subtree-class=fvReportingNode&query-target-filter=and(ne(fvIp.debugMACMessage,""))'
+        query = '/api/node/class/fvIp.json' + \
+                '?rsp-subtree=full&rsp-subtree-class=fvReportingNode&query-target-filter=and(ne(fvIp.debugMACMessage,""))'
         for host in self.hosts:
             fetched_data = self.connection.getRequest(host, query)
             if not self.connection.isDataValid(fetched_data):

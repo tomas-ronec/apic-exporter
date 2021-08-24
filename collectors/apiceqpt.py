@@ -1,8 +1,10 @@
-import logging, re
+import logging
+import re
+from collections import namedtuple
+from typing import Dict, List
+
 import BaseCollector
 from prometheus_client.core import GaugeMetricFamily, Summary
-from typing import List, Dict
-from collections import namedtuple
 
 LOG = logging.getLogger('apic_exporter.exporter')
 TIMEOUT = 5
@@ -30,8 +32,8 @@ class ApicEquipmentCollector(BaseCollector.BaseCollector):
         eqpt_template = namedtuple("apic_equipment", ['type', 'vendor', 'model', 'nodeId', 'acc'])
 
         for host in self.hosts:
-            query = '/api/node/class/eqptFlash.json?rsp-subtree=full&query-target-filter=wcard(eqptFlash.model,\"Micron_M500IT\")'
-            # query = '/api/node/class/eqptFlash.json?rsp-subtree=full&query-target-filter=wcard(eqptFlash.type,\"flash\")'
+            query = '/api/node/class/eqptFlash.json' + \
+                    '?rsp-subtree=full&query-target-filter=wcard(eqptFlash.model,\"Micron_M500IT\")'
             fetched_data = self.connection.getRequest(host, query, TIMEOUT)
             if not self.connection.isDataValid(fetched_data):
                 LOG.warning(
@@ -39,14 +41,14 @@ class ApicEquipmentCollector(BaseCollector.BaseCollector):
                     query)
 
             # get a list of all flash devices NOT in read-write mode
-            flashes = [ eqpt_template(type=dict['eqptFlash']['attributes']['type'],
-                                   vendor=dict['eqptFlash']['attributes']['vendor'],
-                                   model=dict['eqptFlash']['attributes']['model'],
-                                   nodeId=self._parseNodeId(dict['eqptFlash']['attributes']['dn']),
-                                   acc=dict['eqptFlash']['attributes']['acc']
-                                   )
-                        for dict in fetched_data['imdata'] if dict['eqptFlash']['attributes']['model'].startswith('Micron_M500IT')
-                      ]
+            flashes = [eqpt_template(type=d['eqptFlash']['attributes']['type'],
+                                     vendor=d['eqptFlash']['attributes']['vendor'],
+                                     model=d['eqptFlash']['attributes']['model'],
+                                     nodeId=self._parseNodeId(d['eqptFlash']['attributes']['dn']),
+                                     acc=d['eqptFlash']['attributes']['acc']
+                                     )
+                       for d in fetched_data['imdata'] if d['eqptFlash']['attributes']['model'].startswith('Micron_M500IT')
+                       ]
 
             for flash in flashes:
                 if flash.acc == 'read-write':
@@ -58,7 +60,6 @@ class ApicEquipmentCollector(BaseCollector.BaseCollector):
             break  # Each host produces the same metrics
 
         return g_flash_rw
-
 
     @REQUEST_TIME.time()
     def collect(self):
@@ -74,7 +75,7 @@ class ApicEquipmentCollector(BaseCollector.BaseCollector):
 
         for metric in metrics:
             yield metric
-       
+
         LOG.info('Collected %s APIC equipment metrics', self.__metric_counter)
 
     def _parseNodeId(self, dn):

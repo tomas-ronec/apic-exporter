@@ -95,6 +95,35 @@ class ApicSpinePortsCollector(BaseCollector.BaseCollector):
                     value=down_port_count)
 
                 self.__metric_counter += 1
+                        if (port_dict['l1PhysIf']['attributes']['adminSt'] == 'up'
+                           and port_dict['l1PhysIf']['children'][0]['ethpmPhysIf']['attributes']['operSt'] == 'down'):
+                            free_port_count = port_dict['l1PhysIf']['attributes']['id']
+                            free_port_count += 1
+                        elif (port_dict['l1PhysIf']['attributes']['adminSt'] == 'up'
+                              and port_dict['l1PhysIf']['children'][0]['ethpmPhysIf']['attributes']['operSt'] == 'up'):
+                            used_port_count = port_dict['l1PhysIf']['attributes']['id']
+                            used_port_count += 1
+                        elif port_dict['l1PhysIf']['attributes']['adminSt'] == 'down':
+                            down_port_count = port_dict['l1PhysIf']['attributes']['id']
+                            down_port_count += 1
+
+                        # Free Ports
+                        g_free_port.add_metric(
+                            labels=[host, spine_id, pod_id],
+                            value=free_port_count)
+
+                        # Used Ports
+                        g_used_port.add_metric(
+                            labels=[host, spine_id, pod_id],
+                            value=used_port_count)
+
+                        # Down ports
+                        g_down_port.add_metric(
+                            labels=[host, spine_id, pod_id],
+                            value=down_port_count)
+
+                        self.__metric_counter += 1
+
             break  # Each host produces the same metrics.
 
         yield g_free_port

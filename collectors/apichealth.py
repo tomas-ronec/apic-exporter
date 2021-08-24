@@ -86,7 +86,6 @@ class ApicHealthCollector(BaseCollector.BaseCollector):
 
         return metrics
 
-
     @REQUEST_TIME.time()
     def collect(self):
         LOG.debug('Collecting APIC health metrics ...')
@@ -102,5 +101,5 @@ class ApicHealthCollector(BaseCollector.BaseCollector):
 
         for metric in metrics:
             yield metric
-       
+
         LOG.info('Collected %s APIC health metrics', self.__metric_counter)
