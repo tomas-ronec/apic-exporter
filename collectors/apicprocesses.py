@@ -42,8 +42,8 @@ class ApicProcessesCollector(BaseCollector.BaseCollector):
         metric_counter = 0
         query = '/api/node/class/fabricNode.json?'
         for host in self.hosts:
-            fetched_data = self.connection.getRequest(host, query)
-            if not self.connection.isDataValid(fetched_data):
+            fetched_data = self.query_host(host, query)
+            if fetched_data is None:
                 LOG.warning(
                     "Skipping apic host %s, %s did not return anything", host,
                     query)
@@ -57,8 +57,8 @@ class ApicProcessesCollector(BaseCollector.BaseCollector):
                           node_role)
 
                 proc_query = '/api/node/class/' + node_dn + '/procProc.json?query-target-filter=eq(procProc.name,"nfm")'
-                proc_data = self.connection.getRequest(host, proc_query)
-                if not self.connection.isDataValid(proc_data):
+                proc_data = self.query_host(host, proc_query)
+                if fetched_data is None:
                     LOG.info("Apic host %s node %s has no nfm process", host,
                              node_dn)
                     continue
@@ -70,8 +70,8 @@ class ApicProcessesCollector(BaseCollector.BaseCollector):
                     proc_name = proc_data['imdata'][0]['procProc'][
                         'attributes']['name']
                     mem_query = '/api/node/mo/' + proc_dn + '/HDprocProcMem5min-0.json'
-                    mem_data = self.connection.getRequest(host, mem_query)
-                    if not self.connection.isDataValid(mem_data):
+                    mem_data = self.query_host(host, mem_query)
+                    if mem_data is None:
                         LOG.info(
                             "Apic host %s node %s process %s has no memory data",
                             host, node_dn, proc_dn)

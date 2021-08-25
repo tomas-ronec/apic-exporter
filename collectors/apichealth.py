@@ -38,8 +38,8 @@ class ApicHealthCollector(BaseCollector.BaseCollector):
         for host in self.hosts:
             query = '/api/node/class/topSystem.json?query-target-filter=eq(topSystem.oobMgmtAddr,\"' + \
                 host + '\")'
-            fetched_data = self.connection.getRequest(host, query, TIMEOUT)
-            if not self.connection.isDataValid(fetched_data):
+            fetched_data = self.query_host(host, query, TIMEOUT)
+            if fetched_data is None:
                 LOG.warning(
                     "Skipping apic host %s, %s did not return anything", host,
                     query)
@@ -66,8 +66,8 @@ class ApicHealthCollector(BaseCollector.BaseCollector):
 
         query = '/api/node/class/procEntity.json?'
         for host in self.hosts:
-            fetched_data = self.connection.getRequest(host, query)
-            if not self.connection.isDataValid(fetched_data):
+            fetched_data = self.query_host(host, query)
+            if fetched_data is None:
                 LOG.warning(
                     "Skipping apic host %s, %s did not return anything", host,
                     query)

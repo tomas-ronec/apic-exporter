@@ -27,11 +27,8 @@ class ApicIPsCollector(BaseCollector.BaseCollector):
         query = '/api/node/class/fvIp.json' + \
                 '?rsp-subtree=full&rsp-subtree-class=fvReportingNode&query-target-filter=and(ne(fvIp.debugMACMessage,""))'
         for host in self.hosts:
-            fetched_data = self.connection.getRequest(host, query)
-            if not self.connection.isDataValid(fetched_data):
-                LOG.warning(
-                    "Skipping apic host %s, %s did not return anything", host,
-                    query)
+            fetched_data = self.query_host(host, query)
+            if fetched_data is None:
                 continue
 
             if len(fetched_data['imdata']) == 0:

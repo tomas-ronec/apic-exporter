@@ -26,8 +26,8 @@ class ApicInterfacesCollector(BaseCollector.BaseCollector):
         # query only reset counters > 0
         query = '/api/node/class/ethpmPhysIf.json?query-target-filter=gt(ethpmPhysIf.resetCtr,"0")'
         for host in self.hosts:
-            fetched_data = self.connection.getRequest(host, query)
-            if not self.connection.isDataValid(fetched_data):
+            fetched_data = self.query_host(host, query)
+            if fetched_data is None:
                 LOG.warning(
                     "Skipping apic host %s, %s did not return anything", host,
                     query)
