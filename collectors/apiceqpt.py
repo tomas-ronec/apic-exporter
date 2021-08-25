@@ -34,11 +34,12 @@ class ApicEquipmentCollector(BaseCollector.BaseCollector):
         for host in self.hosts:
             query = '/api/node/class/eqptFlash.json' + \
                     '?rsp-subtree=full&query-target-filter=wcard(eqptFlash.model,\"Micron_M500IT\")'
-            fetched_data = self.connection.getRequest(host, query, TIMEOUT)
-            if not self.connection.isDataValid(fetched_data):
+            fetched_data = self.query_host(host, query, TIMEOUT)
+            if fetched_data is None:
                 LOG.warning(
                     "Skipping apic host %s, %s did not return anything", host,
                     query)
+                continue
 
             # get a list of all flash devices NOT in read-write mode
             flashes = [eqpt_template(type=d['eqptFlash']['attributes']['type'],

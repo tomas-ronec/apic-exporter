@@ -45,8 +45,9 @@ class ApicSpinePortsCollector(BaseCollector.BaseCollector):
         query_url = '/api/node/class/fabricNode.json?' + \
                     '&query-target-filter=eq(fabricNode.role,"spine")&order-by=fabricNode.id|asc'
         for host in self.hosts:
-            output = self.connection.getRequest(host, query_url)
-            # output  = json.loads(query.text)
+            output = self.query_host(host, query_url)
+            if output is None:
+                continue
             count = output['totalCount']
             spine_dn_list = []
             for x in range(0, int(count)):
@@ -59,7 +60,11 @@ class ApicSpinePortsCollector(BaseCollector.BaseCollector):
                 free_port = []
                 used_port = []
                 down_port = []
-                output = self.connection.getRequest(host, query_url)
+                
+                output = self.query_host(host, query_url)
+                if output is None:
+                    continue
+                    
                 for x in output['imdata']:
                     pod_id = x['topSystem']['attributes']['podId']
                     spine_id = x['topSystem']['attributes']['id']

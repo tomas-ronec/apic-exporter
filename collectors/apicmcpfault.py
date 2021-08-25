@@ -25,8 +25,9 @@ class ApicMCPCollector(BaseCollector.BaseCollector):
         metric_counter = 0
         query = "/api/node/class/faultInst.json" + \
                 "?query-target-filter=or(eq(faultInst.code,\"F2533\"),eq(faultInst.code,\"F2534\"))"
-            fetched_data = self.connection.getRequest(host, query)
-            if not self.connection.isDataValid(fetched_data):
+        for host in self.hosts:
+            fetched_data = self.query_host(host, query)
+            if fetched_data is None:
                 LOG.warning(
                     "Skipping apic host %s, %s did not return anything", host, query)
                 continue
