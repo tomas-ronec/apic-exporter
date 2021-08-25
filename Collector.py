@@ -25,14 +25,14 @@ class Collector(BaseCollector):
                                       'Time spend processing request')
 
     @abstractmethod
-    def get_metrics(self) -> List[CustomMetric]:
+    def get_metric_definitions(self) -> List[CustomMetric]:
         """Returns the list of metrics to be collected by the collector"""
         pass
 
     def collect(self):
         """Collects the list of metrics defined by the subclass"""
         self.__metric_counter = 0
-        metrics = self.get_metrics()
+        metrics = self.get_metric_definitions()
         with self.__request_time.time():
             LOG.debug('Collecting %s metrics ...', self.__name)
             for metric in metrics:

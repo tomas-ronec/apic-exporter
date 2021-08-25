@@ -18,7 +18,7 @@ class ApicEquipmentCollector(Collector):
         yield GaugeMetricFamily('network_apic_flash_readwrite',
                                 'APIC flash is read and writeable')
 
-    def get_metrics(self) -> List[CustomMetric]:
+    def get_metric_definitions(self) -> List[CustomMetric]:
         metrics = []
 
         metrics.append(CustomMetric(

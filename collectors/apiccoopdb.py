@@ -15,7 +15,7 @@ class ApicCoopDbCollector(Collector):
         yield GaugeMetricFamily('network_apic_coop_records_total',
                                 'APIC COOP DB entries')
 
-    def get_metrics(self) -> List[CustomMetric]:
+    def get_metric_definitions(self) -> List[CustomMetric]:
         metrics = []
 
         metrics.append(CustomMetric(
