@@ -4,7 +4,7 @@ from collections import namedtuple
 from typing import Dict, List
 
 from Collector import Collector
-from prometheus_client.core import Metric, GaugeMetricFamily
+from prometheus_client.core import GaugeMetricFamily
 
 LOG = logging.getLogger('apic_exporter.exporter')
 
@@ -19,11 +19,10 @@ class ApicEquipmentCollector(Collector):
                                 'APIC flash is read and writeable')
 
     def get_query(self) -> str:
-        query = '/api/node/class/eqptFlash.json' + \
+        return '/api/node/class/eqptFlash.json' + \
                 '?rsp-subtree=full&query-target-filter=wcard(eqptFlash.model,\"Micron_M500IT\")'
-        return query
 
-    def get_metrics(self, host: str, data: Dict) -> List[Metric]:
+    def get_metrics(self, host: str, data: Dict) -> List[GaugeMetricFamily]:
         """Collect read-write status of flash equipment"""
 
         g_flash_rw = GaugeMetricFamily('network_apic_flash_readwrite',

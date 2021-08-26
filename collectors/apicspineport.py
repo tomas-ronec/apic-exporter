@@ -1,6 +1,6 @@
 import logging
 from Collector import Collector
-from prometheus_client.core import GaugeMetricFamily, Metric
+from prometheus_client.core import GaugeMetricFamily
 from typing import Dict, List
 
 LOG = logging.getLogger('apic_exporter.exporter')
@@ -24,7 +24,7 @@ class ApicSpinePortsCollector(Collector):
         return '/api/node/class/fabricNode.json?' + \
                '&query-target-filter=eq(fabricNode.role,"spine")&order-by=fabricNode.id|asc'
 
-    def get_metrics(self, host: str, data: Dict) -> List[Metric]:
+    def get_metrics(self, host: str, data: Dict) -> List[GaugeMetricFamily]:
 
         g_free_port = GaugeMetricFamily(
             'network_apic_free_port_count',

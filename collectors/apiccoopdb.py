@@ -1,6 +1,6 @@
 from Collector import Collector
 import logging
-from prometheus_client.core import GaugeMetricFamily, Metric
+from prometheus_client.core import GaugeMetricFamily
 from typing import List, Dict
 
 LOG = logging.getLogger('apic_exporter.exporter')
@@ -18,7 +18,7 @@ class ApicCoopDbCollector(Collector):
     def get_query(self) -> str:
         return '/api/node/class/fabricNode.json?query-target-filter=eq(fabricNode.role,"spine")'
 
-    def get_metrics(self, host: str, data: Dict) -> List[Metric]:
+    def get_metrics(self, host: str, data: Dict) -> List[GaugeMetricFamily]:
         """Collect the number of entries in the coop db for all spines"""
         g_coop_db = GaugeMetricFamily('network_apic_coop_records_total',
                                       'APIC COOP DB entries',
