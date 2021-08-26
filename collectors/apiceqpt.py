@@ -1,7 +1,7 @@
 import logging
 import re
 from collections import namedtuple
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 from Collector import Collector
 from prometheus_client.core import Metric, GaugeMetricFamily
@@ -23,13 +23,12 @@ class ApicEquipmentCollector(Collector):
                 '?rsp-subtree=full&query-target-filter=wcard(eqptFlash.model,\"Micron_M500IT\")'
         return query
 
-    def get_metrics(self, host: str, data: Dict) -> Tuple[List[Metric], int]:
+    def get_metrics(self, host: str, data: Dict) -> List[Metric]:
         """Collect read-write status of flash equipment"""
 
         g_flash_rw = GaugeMetricFamily('network_apic_flash_readwrite',
                                        'APIC flash is read and writeable',
                                        labels=['apicHost', 'node', 'type', 'vendor', 'model'])
-        metric_counter = 0
 
         eqpt_template = namedtuple("apic_equipment", ['type', 'vendor', 'model', 'nodeId', 'acc'])
 
@@ -48,9 +47,8 @@ class ApicEquipmentCollector(Collector):
                 g_flash_rw.add_metric(labels=[host, flash.nodeId, flash.type, flash.vendor, flash.model], value=1)
             else:
                 g_flash_rw.add_metric(labels=[host, flash.nodeId, flash.type, flash.vendor, flash.model], value=0)
-            metric_counter += 1
 
-        return [g_flash_rw], metric_counter
+        return [g_flash_rw]
 
     def _parseNodeId(self, dn):
         matchObj = re.match(u".+node-([0-9]*).+", dn)

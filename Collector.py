@@ -1,6 +1,6 @@
 from abc import abstractmethod
 import logging
-from typing import Dict, List, Tuple
+from typing import Dict, List
 from prometheus_client.core import Summary
 from prometheus_client.metrics_core import Metric
 from BaseCollector import BaseCollector
@@ -20,7 +20,7 @@ class Collector(BaseCollector):
         pass
 
     @abstractmethod
-    def get_metrics(self, host: str, data: Dict) -> Tuple[List[Metric], int]:
+    def get_metrics(self, host: str, data: Dict) -> List[Metric]:
         pass
 
     def collect(self):
@@ -33,10 +33,12 @@ class Collector(BaseCollector):
                 if fetched_data is None:
                     LOG.warning("Skipping apic host %s did not return anything for %s", host, self.get_query())
                     continue
-                metrics, metric_counter = self.get_metrics(host, fetched_data)
+                metrics = self.get_metrics(host, fetched_data)
                 if metrics is None:
                     continue
                 for metric in metrics:
                     yield metric
+                    metric_counter += len(metric.samples)
                 break  # all hosts produce the same metrics, hence querying one is sufficient
             LOG.info('Collected %s %s metrics', metric_counter, self.__name)
+            return
