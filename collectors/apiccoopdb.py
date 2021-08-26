@@ -1,4 +1,4 @@
-from Collector import Collector, CustomMetric
+from Collector import Collector
 import logging
 from prometheus_client.core import GaugeMetricFamily, Metric
 from typing import List, Dict, Tuple
@@ -15,17 +15,10 @@ class ApicCoopDbCollector(Collector):
         yield GaugeMetricFamily('network_apic_coop_records_total',
                                 'APIC COOP DB entries')
 
-    def get_metric_definitions(self) -> List[CustomMetric]:
-        metrics = []
+    def get_query(self) -> str:
+        return '/api/node/class/fabricNode.json?query-target-filter=eq(fabricNode.role,"spine")'
 
-        metrics.append(CustomMetric(
-                name='network_apic_coop_records_total',
-                query='/api/node/class/fabricNode.json?query-target-filter=eq(fabricNode.role,"spine")',
-                process_data=self.collect_apic_coop_db_size))
-
-        return metrics
-
-    def collect_apic_coop_db_size(self, host: str, data: Dict) -> Tuple[Metric, int]:
+    def get_metrics(self, host: str, data: Dict) -> Tuple[List[Metric], int]:
         """Collect the number of entries in the coop db for all spines"""
         g_coop_db = GaugeMetricFamily('network_apic_coop_records_total',
                                       'APIC COOP DB entries',
@@ -45,4 +38,4 @@ class ApicCoopDbCollector(Collector):
             g_coop_db.add_metric(labels=[host, spine_attributes['dn']],
                                  value=fetched_count)
             metric_counter += 1
-        return g_coop_db, metric_counter
+        return [g_coop_db], metric_counter

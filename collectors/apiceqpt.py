@@ -3,7 +3,7 @@ import re
 from collections import namedtuple
 from typing import Dict, List, Tuple
 
-from Collector import Collector, CustomMetric
+from Collector import Collector
 from prometheus_client.core import Metric, GaugeMetricFamily
 
 LOG = logging.getLogger('apic_exporter.exporter')
@@ -18,18 +18,12 @@ class ApicEquipmentCollector(Collector):
         yield GaugeMetricFamily('network_apic_flash_readwrite',
                                 'APIC flash is read and writeable')
 
-    def get_metric_definitions(self) -> List[CustomMetric]:
-        metrics = []
+    def get_query(self) -> str:
+        query = '/api/node/class/eqptFlash.json' + \
+                '?rsp-subtree=full&query-target-filter=wcard(eqptFlash.model,\"Micron_M500IT\")'
+        return query
 
-        metrics.append(CustomMetric(
-            name='network_apic_flash_readwrite',
-            query='/api/node/class/eqptFlash.json' +
-                  '?rsp-subtree=full&query-target-filter=wcard(eqptFlash.model,\"Micron_M500IT\")',
-            process_data=self.collect_flash
-        ))
-        return metrics
-
-    def collect_flash(self, host: str, data: Dict) -> Tuple[Metric, int]:
+    def get_metrics(self, host: str, data: Dict) -> Tuple[List[Metric], int]:
         """Collect read-write status of flash equipment"""
 
         g_flash_rw = GaugeMetricFamily('network_apic_flash_readwrite',
@@ -56,7 +50,7 @@ class ApicEquipmentCollector(Collector):
                 g_flash_rw.add_metric(labels=[host, flash.nodeId, flash.type, flash.vendor, flash.model], value=0)
             metric_counter += 1
 
-        return g_flash_rw, metric_counter
+        return [g_flash_rw], metric_counter
 
     def _parseNodeId(self, dn):
         matchObj = re.match(u".+node-([0-9]*).+", dn)
