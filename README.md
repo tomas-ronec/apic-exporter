@@ -4,12 +4,11 @@ A Prometheus exporter written in Python3 to retrieve custom metrics from Cisco A
 
 ## Adding further metrics
 
-There are two ways to add further metrics. One is extending the [BaseCollector](BaseCollector.py) and the other is extending the [StandardCollector](StandardCollector.py).
+There are two ways to add further metrics. One is extending the [BaseCollector](BaseCollector.py) and the other is extending the [Collector](Collector.py).
 
-When extending from the `BaseCollector` the client has to take care of edge-cases such as the host not answering. The `StandardCollector` takes care of these things and requires solely the logic for creating the Prometheus metrics from query results.
+When extending from the `BaseCollector` the client has to take care of the communication with the different APIC hosts, checking for valid response data etc. The `Collector` takes care of these things and only requires to implement the abstract methods `get_query` (defines the query to be executed against the APIC host) and `get_metrics` (creates the Prometheus metrics from the fetched data).
 
-If you want to contribute additional metrics take the [ApicCoopDbCollector](collectors/apiccoopdb.py) as an Example.
-Here the metrics are defined as a List of `CustomMetric` objects. Each of these objects contains the name of the metric, the query required to fetch the data from the APIC hosts and a method which processes this data. This method is responsible for creating the Prometheus metric from the fetched data.
+For most metrics it is sufficient to extend from the [Collector](Collector.py). See [ApicCoopDbCollector](collectors/apiccoopdb.py) as an example.
 
 ## Docker
 
