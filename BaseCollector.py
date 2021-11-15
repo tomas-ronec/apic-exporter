@@ -26,6 +26,8 @@ class BaseCollector(ABC):
         fetched_data = (self.__connection.getRequest(host, query, timeout)
                         if timeout is not None
                         else self.__connection.getRequest(host, query))
+        if fetched_data is None:
+            return None
         if not self.__connection.isDataValid(fetched_data):
             LOG.warning(
                 "Apic host %s, %s did not return anything", host,
