@@ -58,7 +58,7 @@ class ApicProcessesCollector(BaseCollector.BaseCollector):
 
                 proc_query = '/api/node/class/' + node_dn + '/procProc.json?query-target-filter=eq(procProc.name,"nfm")'
                 proc_data = self.query_host(host, proc_query)
-                if fetched_data is None:
+                if proc_data is None:
                     LOG.info("Apic host %s node %s has no nfm process", host,
                              node_dn)
                     continue
