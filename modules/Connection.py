@@ -85,6 +85,9 @@ class SessionPool(object):
             session.cookies.clear_session_cookies()
             session.cookies = cookies.cookiejar_from_dict(
                 cookie_dict={"APIC-cookie": cookie}, cookiejar=session.cookies)
+            available = True
+        else:
+            available = False
 
         self.__sessions[host] = session_tuple(session, available)
         return session
@@ -110,11 +113,9 @@ class SessionPool(object):
                 requests.exceptions.ReadTimeout, TimeoutError):
             LOG.error("Connection with host %s timed out after %s sec", host,
                       COOKIE_TIMEOUT)
-            self.set_session_unavailable(host)
             return None
         except (requests.exceptions.ConnectionError, ConnectionError) as e:
             LOG.error("Cannot connect to %s: %s", url, e)
-            self.set_session_unavailable(host)
             return None
 
         cookie = None

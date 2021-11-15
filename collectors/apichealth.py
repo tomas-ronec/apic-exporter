@@ -40,9 +40,6 @@ class ApicHealthCollector(BaseCollector.BaseCollector):
                 host + '\")'
             fetched_data = self.query_host(host, query, TIMEOUT)
             if fetched_data is None:
-                LOG.warning(
-                    "Skipping apic host %s, %s did not return anything", host,
-                    query)
                 g_access.add_metric(labels=[host], value=0)
             else:
                 g_access.add_metric(labels=[host], value=1)
