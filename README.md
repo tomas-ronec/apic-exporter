@@ -21,7 +21,6 @@ exporter:
 aci:
   apic_hosts:
   apic_user:
-  apic_password:
   apic_tenant_name:
 collectors:
   - "ApicHealthCollector"
@@ -30,6 +29,8 @@ collectors:
 ```
 
 The list of collectors can be used to select the list of collectors to be run. If no collectors are specified, all are run.
+
+Additionally an environment variable `APIC_PASSWORD` is required.
 
 ## Docker
 

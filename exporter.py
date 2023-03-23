@@ -29,12 +29,25 @@ def get_config(config_file):
         except IOError as e:
             LOG.error("Couldn't open configuration file: " + str(e))
             exit(1)
+        # check if collectors are defined
         if 'collectors' not in config:
             LOG.info("Collectors not defined in config. Using defaults")
             config['collectors'] = get_default_collectors()
         elif len(config['collectors']) == 0:
             LOG.error("Empty list of collectors")
             exit(1)
+
+        # load apic password from environment
+        pw = os.getenv('APIC_PASSWORD')
+        if pw is None:
+            LOG.error("envvar 'APIC_PASSWORD' not set")
+            exit(1)
+        if 'aci' in config:
+            config['aci']['apic_password'] = pw
+        else:
+            LOG.error("section 'aci' missing in config")
+            exit(1)
+
         return config
     else:
         LOG.error("Config file doesn't exist: " + config_file)
