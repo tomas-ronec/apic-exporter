@@ -12,7 +12,8 @@ from prometheus_client import start_http_server
 LOG = logging.getLogger('apic_exporter.exporter')
 
 DEFAULT_COLLECTORS = ['ApicHealthCollector', 'ApicInterfacesCollector', 'ApicIPsCollector', 'ApicCoopDbCollector',
-                      'ApicEquipmentCollector', 'ApicMCPCollector', 'ApicSpinePortsCollector']
+                      'ApicEquipmentCollector', 'ApicMCPCollector', 'ApicSpinePortsCollector',
+                      'ApicProcessesCollector', 'ApicMcecmProcessesCollector']
 
 
 def run_prometheus_server(port, collectors):
