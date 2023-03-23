@@ -10,6 +10,27 @@ When extending from the `BaseCollector` the client has to take care of the commu
 
 For most metrics it is sufficient to extend from the [Collector](Collector.py). See [ApicCoopDbCollector](collectors/apiccoopdb.py) as an example.
 
+## Example Config
+
+The exporter is configured by passing a `yaml` of the following structure:
+
+```yaml
+exporter:
+  log_level: INFO
+  prometheus_port: 9102
+aci:
+  apic_hosts:
+  apic_user:
+  apic_password:
+  apic_tenant_name:
+collectors:
+  - "ApicHealthCollector"
+  - "ApicIPsCollector"
+  - ...
+```
+
+The list of collectors can be used to select the list of collectors to be run. If no collectors are specified, all are run.
+
 ## Docker
 
 Build the Docker image locally with `make build`.

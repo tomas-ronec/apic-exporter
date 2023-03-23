@@ -4,25 +4,22 @@ import os
 import sys
 import time
 import click
+import importlib
 
 from prometheus_client.core import REGISTRY
 from prometheus_client import start_http_server
 
-from collectors import apicspineport, apichealth, apicinterfaces, apicprocesses, apicips, apiccoopdb, apiceqpt, apicmcpfault,apicmcecmproc
 LOG = logging.getLogger('apic_exporter.exporter')
 
+DEFAULT_COLLECTORS = ['ApicHealthCollector', 'ApicInterfacesCollector', 'ApicIPsCollector', 'ApicCoopDbCollector',
+                      'ApicEquipmentCollector', 'ApicMCPCollector', 'ApicSpinePortsCollector',
+                      'ApicProcessesCollector', 'ApicMcecmProcessesCollector']
 
-def run_prometheus_server(port, apic_config):
+
+def run_prometheus_server(port, collectors):
     start_http_server(int(port))
-    REGISTRY.register(apichealth.ApicHealthCollector(apic_config))
-    REGISTRY.register(apicinterfaces.ApicInterfacesCollector(apic_config))
-    REGISTRY.register(apicprocesses.ApicProcessesCollector(apic_config))
-    REGISTRY.register(apicips.ApicIPsCollector(apic_config))
-    REGISTRY.register(apiccoopdb.ApicCoopDbCollector(apic_config))
-    REGISTRY.register(apiceqpt.ApicEquipmentCollector(apic_config))
-    REGISTRY.register(apicmcpfault.ApicMCPCollector(apic_config))
-    REGISTRY.register(apicspineport.ApicSpinePortsCollector(apic_config))
-    REGISTRY.register(apicmcecmproc.ApicMcecmProcessesCollector(apic_config))
+    for c in collectors:
+        REGISTRY.register(c)
     while True:
         time.sleep(1)
 
@@ -34,10 +31,27 @@ def get_config(config_file):
                 config = yaml.load(f, Loader=yaml.Loader)
         except IOError as e:
             LOG.error("Couldn't open configuration file: " + str(e))
+        if 'collectors' not in config:
+            LOG.info("Collectors not defined in config. Using defaults")
+            config['collectors'] = DEFAULT_COLLECTORS
         return config
     else:
         LOG.error("Config file doesn't exist: " + config_file)
         exit(0)
+
+
+def initialize_collector_by_name(class_name, config):
+    try:
+        class_module = importlib.import_module(f'collectors.{class_name}')
+    except ModuleNotFoundError as e:
+        LOG.error(f'No Collector {class_name} defined. {e}')
+        return None
+
+    try:
+        return class_module.__getattribute__(class_name)(config)
+    except AttributeError as e:
+        LOG.error(f'Unable to initialize {class_name}. {e}')
+        return None
 
 
 @click.command()
@@ -58,6 +72,8 @@ def main(port, config):
     exporter_config = config_obj['exporter']
     apic_config = config_obj['aci']
 
+    collectors = list(map(lambda c: initialize_collector_by_name(c, apic_config), config_obj['collectors']))
+
     level = logging.getLevelName("INFO")
     if exporter_config['log_level']:
         level = logging.getLevelName(exporter_config['log_level'].upper())
@@ -68,7 +84,7 @@ def main(port, config):
     LOG.info("Starting Apic Exporter on port={} config={}".format(port, config))
     LOG.info("APIC Exporter connects to APIC hosts: %s", apic_config['apic_hosts'])
 
-    run_prometheus_server(port, apic_config)
+    run_prometheus_server(port, collectors)
 
 
 if __name__ == '__main__':
