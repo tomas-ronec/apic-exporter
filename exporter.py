@@ -5,15 +5,12 @@ import sys
 import time
 import click
 import importlib
+import pkgutil
 
 from prometheus_client.core import REGISTRY
 from prometheus_client import start_http_server
 
 LOG = logging.getLogger('apic_exporter.exporter')
-
-DEFAULT_COLLECTORS = ['ApicHealthCollector', 'ApicInterfacesCollector', 'ApicIPsCollector', 'ApicCoopDbCollector',
-                      'ApicEquipmentCollector', 'ApicMCPCollector', 'ApicSpinePortsCollector',
-                      'ApicProcessesCollector', 'ApicMcecmProcessesCollector']
 
 
 def run_prometheus_server(port, collectors):
@@ -31,13 +28,21 @@ def get_config(config_file):
                 config = yaml.load(f, Loader=yaml.Loader)
         except IOError as e:
             LOG.error("Couldn't open configuration file: " + str(e))
+            exit(1)
         if 'collectors' not in config:
             LOG.info("Collectors not defined in config. Using defaults")
-            config['collectors'] = DEFAULT_COLLECTORS
+            config['collectors'] = get_default_collectors()
+        elif len(config['collectors']) == 0:
+            LOG.error("Empty list of collectors")
+            exit(1)
         return config
     else:
         LOG.error("Config file doesn't exist: " + config_file)
-        exit(0)
+        exit(1)
+
+
+def get_default_collectors():
+    return [name for _, name, _ in pkgutil.iter_modules(['collectors'])]
 
 
 def initialize_collector_by_name(class_name, config):
