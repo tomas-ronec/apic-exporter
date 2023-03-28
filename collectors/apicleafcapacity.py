@@ -87,11 +87,4 @@ class ApicLeafCapacityCollector(Collector):
                     g_leaf_cap_tcam.add_metric(labels=[leaf_id, 'remote', 'l2'],
                                                value=l2_remote)
 
-        return [g_leaf_cap_tcam_l3_max,
-                g_leaf_cap_tcam_l3_used_total,
-                g_leaf_cap_tcam_l3_used_local,
-                g_leaf_cap_tcam_l3_used_remote,
-                g_leaf_cap_tcam_l2_max,
-                g_leaf_cap_tcam_l2_used_total,
-                g_leaf_cap_tcam_l2_used_local,
-                g_leaf_cap_tcam_l2_used_remote]
+             return [g_leaf_cap_tcam]
