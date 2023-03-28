@@ -16,10 +16,10 @@ class ApicLeafCapacityCollector(Collector):
                                 'ACI Leaf capacity')
 
     def get_query(self) -> str:
-        return '/api/class/eqptcapacityEntity.json?query-target=self\
-                &rsp-subtree-include=stats&rsp-subtree-class=eqptcapacityL3RemoteUsageCap5min,\
-                eqptcapacityL3TotalUsageCap5min,eqptcapacityL3Usage5min,eqptcapacityL3TotalUsage5min,\
-                eqptcapacityL2Usage5min,eqptcapacityL2RemoteUsage5min,eqptcapacityL2TotalUsage5min'
+        return '/api/class/eqptcapacityEntity.json?query-target=self' + \
+               '&rsp-subtree-include=stats&rsp-subtree-class=eqptcapacityL3RemoteUsageCap5min,' + \
+               'eqptcapacityL3TotalUsageCap5min,eqptcapacityL3Usage5min,eqptcapacityL3TotalUsage5min,' + \
+               'eqptcapacityL2Usage5min,eqptcapacityL2RemoteUsage5min,eqptcapacityL2TotalUsage5min'
 
     def get_metrics(self, host: str, data: Dict) -> List[GaugeMetricFamily]:
         """Collect the number of EPs and TCAM usage on all leaf switches"""
