@@ -23,30 +23,9 @@ class ApicLeafCapacityCollector(Collector):
 
     def get_metrics(self, host: str, data: Dict) -> List[GaugeMetricFamily]:
         """Collect the number of EPs and TCAM usage on all leaf switches"""
-        g_leaf_cap_tcam_l3_max = GaugeMetricFamily('network_apic_leaf_capacity_tcam_l3_max',
-                                      'ACI Leaf IPv4 EndPoint TCAM capacity available',
-                                      labels=['aciLeaf', 'usage', 'layer'])
-        g_leaf_cap_tcam_l3_used_total = GaugeMetricFamily('network_apic_leaf_capacity_tcam_l3_used_total',
-                                      'ACI Leaf IPv4 EndPoint TCAM capacity total usage',
-                                      labels=['aciLeaf', 'usage', 'layer'])
-        g_leaf_cap_tcam_l3_used_local = GaugeMetricFamily('network_apic_leaf_capacity_tcam_l3_used_local',
-                                      'ACI Leaf Local IPv4 EndPoint TCAM capacity usage',
-                                      labels=['aciLeaf', 'usage', 'layer'])
-        g_leaf_cap_tcam_l3_used_remote = GaugeMetricFamily('network_apic_leaf_capacity_tcam_l3_used_remote',
-                                      'ACI Leaf Remote IPv4 EndPoint TCAM capacity usage',
-                                      labels=['aciLeaf', 'usage', 'layer'])
-        g_leaf_cap_tcam_l2_max = GaugeMetricFamily('network_apic_leaf_capacity_tcam_l2_max',
-                                      'ACI Leaf MAC EndPoint TCAM capacity available',
-                                      labels=['aciLeaf', 'usage', 'layer'])
-        g_leaf_cap_tcam_l2_used_total = GaugeMetricFamily('network_apic_leaf_capacity_tcam_l2_used_total',
-                                      'ACI Leaf MAC EndPoint TCAM capacity total usage',
-                                      labels=['aciLeaf', 'usage', 'layer'])
-        g_leaf_cap_tcam_l2_used_local = GaugeMetricFamily('network_apic_leaf_capacity_l2_used_local',
-                                      'ACI Leaf Local MAC EndPoint TCAM capacity usage',
-                                      labels=['aciLeaf', 'usage', 'layer'])
-        g_leaf_cap_tcam_l2_used_remote = GaugeMetricFamily('network_apic_leaf_capacity_l2_used_remote',
-                                      'ACI Leaf Remote MAC EndPoint TCAM capacity usage',
-                                      labels=['aciLeaf', 'usage', 'layer'])
+        g_leaf_cap_tcam = GaugeMetricFamily('network_apic_leaf_capacity_tcam',
+                                            'ACI Leaf IPv4 EndPoint TCAM capacity available',
+                                            labels=['aciLeaf', 'usage', 'layer'])
 
         for leaf in data['imdata']:
             if leaf['eqptcapacityEntity']['children']:
