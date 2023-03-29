@@ -10,6 +10,7 @@ class ApicLeafCapacityCollector(Collector):
 
     def __init__(self, config: Dict):
         super().__init__('apic_leaf_capacity', config)
+        self.leaf_ids = {}
 
     def describe(self):
         yield GaugeMetricFamily('network_apic_leaf_capacity',
@@ -26,13 +27,16 @@ class ApicLeafCapacityCollector(Collector):
         g_leaf_cap_tcam = GaugeMetricFamily('network_apic_leaf_capacity_tcam',
                                             'ACI Leaf IPv4 EndPoint TCAM capacity available',
                                             labels=['aciLeaf', 'usage', 'layer'])
-
+        if not self.leaf_ids:
+            self.leaf_ids = self._get_leaf_ids(host)
         for leaf in data['imdata']:
             if leaf['eqptcapacityEntity']['children']:
                 """Ignore spine switches without children data"""
                 leaf_data = leaf['eqptcapacityEntity']['children']
                 leaf_dn = leaf['eqptcapacityEntity']['attributes']['dn'].split('/')
                 leaf_id = leaf_dn[2]
+                if not self.leaf_ids.get(leaf_id, False):
+                    continue
                 for data_object in leaf_data:
                     if 'eqptcapacityL3TotalUsageCap5min' in data_object:
                         l3_max = data_object['eqptcapacityL3TotalUsageCap5min']['attributes']['v4TotalEpCapMax']
@@ -66,3 +70,12 @@ class ApicLeafCapacityCollector(Collector):
                         g_leaf_cap_tcam.add_metric(labels=[leaf_id, 'remote', 'l2'],
                                                    value=l2_remote)
         return [g_leaf_cap_tcam]
+
+    def _get_leaf_ids(self, host: str) -> Dict:
+        '''_get_leaf_ids queries the apic for all fabricNodes with role="leaf" and returns a map containing leaf ids'''
+        result = self.query_host(host, '/api/node/class/fabricNode.json?query-target-filter=eq(fabricNode.role,"leaf")')
+        leaf_ids = {}
+        for leaf in result['imdata']:
+            leaf_id = leaf['fabricNode']['attributes']['dn'].split('/')[2]
+            leaf_ids[leaf_id] = True
+        return leaf_ids
