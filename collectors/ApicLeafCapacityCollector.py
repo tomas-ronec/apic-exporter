@@ -30,7 +30,7 @@ class ApicLeafCapacityCollector(Collector):
         if not self.leaf_ids:
             self.leaf_ids = self._get_leaf_ids(host)
         for leaf in data['imdata']:
-            if leaf['eqptcapacityEntity']['children']:
+            if 'eqptcapacityEntity' in leaf and 'children' in leaf['eqptcapacityEntity']:
                 """Ignore spine switches without children data"""
                 leaf_data = leaf['eqptcapacityEntity']['children']
                 leaf_dn = leaf['eqptcapacityEntity']['attributes']['dn'].split('/')
