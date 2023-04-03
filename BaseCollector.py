@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from modules.Connection import Connection
+from modules.Connection import Connection, TIMEOUT
 import logging
 from typing import Dict, List
 
@@ -20,12 +20,9 @@ class BaseCollector(ABC):
     def collect(self):
         pass
 
-    def query_host(self, host: str, query: str, timeout: int = None) -> Dict:
+    def query_host(self, host: str, query: str, timeout: int = TIMEOUT) -> Dict:
         """Executes the query against a specific APIC host and returns the fetched data or None if fetched data is invalid"""
-
-        fetched_data = (self.__connection.getRequest(host, query, timeout)
-                        if timeout is not None
-                        else self.__connection.getRequest(host, query))
+        fetched_data = self.__connection.getRequest(host, query, timeout)
         if fetched_data is None:
             return None
         if not self.__connection.isDataValid(fetched_data):
