@@ -107,7 +107,6 @@ class ApicLeafCapacityCollector(Collector):
         '''_get_leaf_ids queries the apic for all fabricNodes with role="leaf" and returns a map containing leaf ids'''
         result = self.query_host(host, '/api/node/class/fabricNode.json?query-target-filter=eq(fabricNode.role,"leaf")')
         leaf_ids = {}
-        gen1_leaves = {}
         for leaf in result['imdata']:
             leaf_id = leaf['fabricNode']['attributes']['id']
             leaf_ids[leaf_id] = True
