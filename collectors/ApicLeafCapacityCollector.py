@@ -98,10 +98,10 @@ class ApicLeafCapacityCollector(Collector):
                             l2_remote = data_object['eqptcapacityL2RemoteUsage5min']['attributes']['remoteEpLast']
                             g_leaf_cap_tcam.add_metric(labels=[leaf_id, 'remote', 'l2'],
                                                        value=l2_remote)
-                        l3_total = l3_local + l3_remote
-                        l2_total = l2_local + l2_remote
-                        g_leaf_cap_tcam.add_metric(labels=[leaf_id, 'total', 'l3'], value=l3_total)
-                        g_leaf_cap_tcam.add_metric(labels=[leaf_id, 'total', 'l2'], value=l2_total)
+                    l3_total = l3_local + l3_remote
+                    l2_total = l2_local + l2_remote
+                    g_leaf_cap_tcam.add_metric(labels=[leaf_id, 'total', 'l3'], value=l3_total)
+                    g_leaf_cap_tcam.add_metric(labels=[leaf_id, 'total', 'l2'], value=l2_total)
         return [g_leaf_cap_tcam]
 
     def _get_leaf_ids(self, host: str) -> Dict:
