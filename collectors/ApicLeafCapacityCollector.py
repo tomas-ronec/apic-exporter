@@ -56,7 +56,7 @@ class ApicLeafCapacityCollector(Collector):
                                                        value=l3_local)
                         elif 'eqptcapacityL3RemoteUsage5min' in data_object:
                             l3_remote = data_object['eqptcapacityL3RemoteUsage5min']['attributes']['v4RemoteEpLast']
-                             g_leaf_cap_tcam.add_metric(labels=[leaf_id, 'remote', 'l3'],
+                            g_leaf_cap_tcam.add_metric(labels=[leaf_id, 'remote', 'l3'],
                                                        value=l3_remote)
                         elif 'eqptcapacityL2TotalUsage5min' in data_object:
                             l2_max = data_object['eqptcapacityL2TotalUsage5min']['attributes']['totalEpCapMax']
@@ -85,7 +85,7 @@ class ApicLeafCapacityCollector(Collector):
                                                        value=l3_local)
                         elif 'eqptcapacityL3RemoteUsage5min' in data_object:
                             l3_remote = data_object['eqptcapacityL3RemoteUsage5min']['attributes']['v4RemoteEpLast']
-                             g_leaf_cap_tcam.add_metric(labels=[leaf_id, 'remote', 'l3'],
+                            g_leaf_cap_tcam.add_metric(labels=[leaf_id, 'remote', 'l3'],
                                                        value=l3_remote)
                         elif 'eqptcapacityL2Usage5min' in data_object:
                             l2_max = data_object['eqptcapacityL2Usage5min']['attributes']['localEpCapMax']
