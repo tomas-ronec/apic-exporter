@@ -11,6 +11,7 @@ class ApicLeafCapacityCollector(Collector):
     def __init__(self, config: Dict):
         super().__init__('apic_leaf_capacity', config)
         self.leaf_ids = {}
+        self.gen1_leaves = {}
 
     def describe(self):
         yield GaugeMetricFamily('network_apic_leaf_capacity',
@@ -18,7 +19,7 @@ class ApicLeafCapacityCollector(Collector):
 
     def get_query(self) -> str:
         return '/api/class/eqptcapacityEntity.json?query-target=self' + \
-               '&rsp-subtree-include=stats&rsp-subtree-class=eqptcapacityL3RemoteUsage5min,' + \
+               '&rsp-subtree-include=stats&rsp-subtree-class=eqptcapacityL3RemoteUsage5min,eqptcapacityL3RemoteUsageCap5min' + \
                'eqptcapacityL3TotalUsageCap5min,eqptcapacityL3Usage5min,eqptcapacityL3TotalUsage5min,' + \
                'eqptcapacityL2Usage5min,eqptcapacityL2RemoteUsage5min,eqptcapacityL2TotalUsage5min'
 
