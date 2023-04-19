@@ -115,7 +115,7 @@ class ApicLeafCapacityCollector(Collector):
             leaf_id = leaf['fabricNode']['attributes']['id']
             leaf_ids[leaf_id] = True
         return leaf_ids
-    def _get_gen1_leaves(self, host: str) -> Dist:
+    def _get_gen1_leaves(self, host: str) -> Dict:
         '''filter for generation 1 leaf models'''
         result = self.query_host(host, '/api/node/class/fabricNode.json?query-target-filter=or(wcard(fabricNode.model,"PQ"),wcard(fabricNode.model,"PX"))')
         gen1_leaves = {}
