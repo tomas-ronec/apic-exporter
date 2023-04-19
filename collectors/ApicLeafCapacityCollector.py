@@ -75,6 +75,8 @@ class ApicLeafCapacityCollector(Collector):
                             g_leaf_cap_tcam.add_metric(labels=[leaf_id, 'remote', 'l2'],
                                                        value=l2_remote)
                 else:
+                    l2_local, l2_remote = 0
+                    l3_local, l3_remote = 0
                     for data_object in leaf_data:
                         if 'eqptcapacityL3RemoteUsageCap5min' in data_object:
                             l3_max = data_object['eqptcapacityL3RemoteUsageCap5min']['attributes']['v4RemoteEpCapMax']
