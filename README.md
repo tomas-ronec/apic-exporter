@@ -38,6 +38,15 @@ Build the Docker image locally with `make build`.
 
 And test with `docker run -p 9102:9102 -v ~/Developer/git/apic-exporter/apic-config-sample.yaml:/config.yaml apic-exporter:latest -c /config.yaml`
 
+## VS Code Dev Container
+
+1. Ensure that your system meets the requirement mentioned in the [Getting Started](https://code.visualstudio.com/docs/devcontainers/containers#_system-requirements) section of the Dev Containers documentation.
+2. Clone this repository to your local filesystem
+3. Open the repository in VS Code
+4. Press `F1`, `CMD+Shift+P` and select __Dev Containers: Reopen in Container__
+5. Now you have a running Python Dev Environment.
+6. You will need to fill the `apic-config-sample.yaml` and `launch.json` with actual values to be able to debug.
+
 ## Further Readings
 
 - [API configuration guide](https://www.cisco.com/c/en/us/td/docs/switches/datacenter/aci/apic/sw/2-x/rest_cfg/2_1_x/b_Cisco_APIC_REST_API_Configuration_Guide/b_Cisco_APIC_REST_API_Configuration_Guide_chapter_01.html)
