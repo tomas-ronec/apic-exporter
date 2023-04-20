@@ -41,7 +41,7 @@ class ApicLeafCapacityCollector(Collector):
                 leaf_id = leaf_dn[2]
                 if not self.leaf_ids.get(leaf_id, False):
                     continue
-                if self.gen1_leaves.get(leaf_id, False):
+                if not self.gen1_leaves.get(leaf_id, False):
                     for data_object in leaf_data:
                         if 'eqptcapacityL3TotalUsageCap5min' in data_object:
                             l3_max = data_object['eqptcapacityL3TotalUsageCap5min']['attributes']['v4TotalEpCapMax']
