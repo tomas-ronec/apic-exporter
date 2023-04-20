@@ -5,4 +5,4 @@ aci:
   apic_hosts: "<apic-ip>"
   apic_user: "<apic-user>"
 collectors:
-  - "ApicLeafCapacityCollector"
+  - "<collector-name>"
