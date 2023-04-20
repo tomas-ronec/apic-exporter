@@ -2,7 +2,7 @@ exporter:
   log_level: INFO
   prometheus_port: 9102
 aci:
-  apic_hosts:
-  apic_user:
-  apic_password:
-  apic_tenant_name:
+  apic_hosts: "<apic-ip>"
+  apic_user: "<apic-user>"
+collectors:
+  - "ApicLeafCapacityCollector"
