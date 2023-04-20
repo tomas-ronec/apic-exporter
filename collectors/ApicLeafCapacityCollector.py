@@ -112,7 +112,7 @@ class ApicLeafCapacityCollector(Collector):
         result = self.query_host(host, '/api/node/class/fabricNode.json?query-target-filter=eq(fabricNode.role,"leaf")')
         leaf_ids = {}
         for leaf in result['imdata']:
-            leaf_id = leaf['fabricNode']['attributes']['id']
+            leaf_id = leaf['fabricNode']['attributes']['dn'].split('/')[2]
             leaf_ids[leaf_id] = True
         return leaf_ids
     def _get_gen1_leaves(self, host: str) -> Dict:
@@ -123,6 +123,6 @@ class ApicLeafCapacityCollector(Collector):
                                        ',eq(fabricNode.role,"leaf"))')
         gen1_leaves = {}
         for leaf in result['imdata']:
-            leaf_id = leaf['fabricNode']['attributes']['id']
+            leaf_id = leaf['fabricNode']['attributes']['dn'].split('/')[2]
             gen1_leaves[leaf_id] = True
         return gen1_leaves
