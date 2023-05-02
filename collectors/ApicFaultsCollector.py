@@ -20,9 +20,9 @@ class ApicFaultsCollector(Collector):
                'query-target-filter=or(eq(faultInst.lc,"raised"),eq(faultInst.lc,"soaking"))'
 
     def get_metrics(self, host: str, data: Dict) -> List[GaugeMetricFamily]:
-        """Collect and sort APIC Faults by type, severity, domain and acknowledgement"""
-        g_apic_faults = GaugeMetricFamily('network_apic_faults_severity',
-                                          'APIC faults by severity, type and domain',
+        """Collects APIC faults by type, severity, domain and acknowledgement"""
+        g_apic_faults = GaugeMetricFamily('network_apic_faults',
+                                          'APIC faults by severity, type, domain and ack',
                                           labels=['severity', 'type', 'domain', 'ack'])
 
         faults = {}
