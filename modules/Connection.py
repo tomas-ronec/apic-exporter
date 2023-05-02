@@ -23,12 +23,15 @@ class SessionPool(object):
         self.__sessions = {}
         self.__user = user
         self.__password = password
+        self.__unavailable_sessions = 0
 
         for host in hosts:
             self.__sessions[host] = self.createSession(host)
 
     def getSession(self, host: str) -> session_tuple:
         """Returns the session and availability"""
+        if self.__unavailable_sessions == len(self.__sessions):
+            self.reset_unavailable_hosts()
         return self.__sessions[host]
 
     def createSession(self, host: str) -> session_tuple:
@@ -43,13 +46,14 @@ class SessionPool(object):
                 cookie_dict={"APIC-cookie": cookie})
 
         available = True if session is not None and cookie is not None else False
-
+        if not available:
+            self.__unavailable_sessions += 1
         return session_tuple(session, available)
 
     def reset_unavailable_hosts(self):
         """Reset availability of all sessions and try to repair unavailable sessions."""
+        unavailable = 0
         for host, value in self.__sessions.items():
-
             if value.session is None:
                 self.__sessions[host] = self.createSession(host)
                 continue
@@ -62,18 +66,23 @@ class SessionPool(object):
                     self.__sessions[host] = session_tuple(value.session, True)
                 else:
                     self.__sessions[host] = session_tuple(value.session, False)
+                    unavailable += 1
             else:
                 self.__sessions[host] = session_tuple(value.session, True)
+        self.__unavailable_sessions = unavailable
 
     def get_unavailable_sessions(self) -> List[str]:
         return [k for k, v in self.__sessions.items() if not v.available]
 
     def set_session_unavailable(self, host: str):
-        """Set a given host to be unavailable"""
+        """Set a given host to be unavailable. Resets hosts, if all are unavailable"""
         if host in self.__sessions:
             LOG.debug("Flag host %s as unavailable", host)
             session, _ = self.__sessions[host]
             self.__sessions[host] = session_tuple(session, False)
+            self.__unavailable_sessions += 1
+        if self.__unavailable_sessions == len(self.__sessions):
+            self.reset_unavailable_hosts()
 
     def refreshCookie(self, host: str) -> requests.Session:
         """Clears old cookie and requests a fresh one"""
