@@ -10,8 +10,6 @@ class ApicFaultsCollector(Collector):
 
     def __init__(self, config: Dict):
         super().__init__('apic_faults', config)
-        self.leaf_ids = {}
-        self.gen1_leaves = {}
 
     def describe(self):
         yield GaugeMetricFamily('network_apic_faults',
