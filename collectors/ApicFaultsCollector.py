@@ -49,4 +49,3 @@ def unpack(data, *keys):
         else:
             return ValueError(f"{keys} not found in data")
     return data
-
