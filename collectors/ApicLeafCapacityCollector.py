@@ -114,7 +114,7 @@ class ApicLeafCapacityCollector(Collector):
         for leaf in result['imdata']:
             leaf_id = leaf['fabricNode']['attributes']['dn'].split('/')[2]
             leaf_ids[leaf_id] = True
-        return leaf_id
+        return leaf_ids
 
     def _get_gen1_leaves(self, host: str) -> Dict:
         '''filter for generation 1 leaf models'''
