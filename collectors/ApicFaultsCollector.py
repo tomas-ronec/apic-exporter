@@ -29,7 +29,10 @@ class ApicFaultsCollector(Collector):
         for fault_object in data['imdata']:
             try:
                 attrs = unpack(fault_object, 'faultInst', 'attributes')
-                key = tuple(unpack(attrs, x)
+                key = [unpack(attrs, x) for x in ('severity', 'type', 'domain', 'code', 'cause', 'dn', 'ack')]
+                # only interested in the presence of the keyword `openstack` within the DN
+                key[5] = '1' if key[5] is not None and "openstack" in key[5] else '0'
+                key = tuple(key)
                             for x in ('severity', 'type', 'domain', 'code', 'cause', 'ack'))
                 faults[key] = faults.get(key, 0) + 1
             except ValueError as e:
