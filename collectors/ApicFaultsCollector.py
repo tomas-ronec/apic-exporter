@@ -22,15 +22,15 @@ class ApicFaultsCollector(Collector):
     def get_metrics(self, host: str, data: Dict) -> List[GaugeMetricFamily]:
         """Collects APIC faults by type, severity, domain and acknowledgement"""
         g_apic_faults = GaugeMetricFamily('network_apic_faults',
-                                          'APIC faults by severity, type, domain and ack',
-                                          labels=['severity', 'type', 'domain', 'ack'])
+                                          'APIC faults by severity, type, domain, code, cause, openstack and ack',
+                                          labels=['severity', 'type', 'domain', 'code', 'cause', 'openstack', 'ack'])
 
         faults = {}
         for fault_object in data['imdata']:
             try:
                 attrs = unpack(fault_object, 'faultInst', 'attributes')
                 key = tuple(unpack(attrs, x)
-                            for x in ('severity', 'type', 'domain', 'ack'))
+                            for x in ('severity', 'type', 'domain', 'code', 'cause', 'ack'))
                 faults[key] = faults.get(key, 0) + 1
             except ValueError as e:
                 LOG.error(
